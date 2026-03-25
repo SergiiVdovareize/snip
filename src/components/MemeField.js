@@ -103,12 +103,13 @@ const MemeField = () => {
     const validateMeme = (url) => {
         const urlPatterns = {
             tiktok: /^https?:\/\/(www\.)?tiktok\.com\/@[\w.-]+\/video\/\d+/,
-            instagram: /^https?:\/\/(www\.)?instagram\.com\/(reels?|p)\/[\w-]+/,
+            instagram: /^https?:\/\/(www\.)?instagram\.com\/(reels?|p|stories)\/[\w.-]+/,
             twitter: /^https?:\/\/(www\.)?(twitter|x)\.com\/[\w.-]+\/status\/\d+/,
             youtube: /^https?:\/\/(www\.)?(youtube\.com|youtu\.be)\/(watch\?v=|shorts\/)[\w-]+/,
             facebook: /^https?:\/\/(www\.)?facebook\.com\/(reel\/|.+\/posts\/|watch\/\?v=)\d+/,
             facebookShare: /^https?:\/\/(www\.)?facebook\.com\/share\/r\/[\w-]+/,
             linkedin: /^https?:\/\/(www\.)?linkedin\.com\/posts\/[\w-]+/,
+            threads: /^https?:\/\/(www\.)?threads\.(net|com)\/(@[\w.-]+)\/post\/[\w-]+/,
         };
 
         // TODO: ADD - https://fb.watch/u_MnTouOL5/
