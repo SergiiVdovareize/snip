@@ -14,8 +14,8 @@
     "sentry:sourcemaps": "sentry-cli sourcemaps inject --org home-sr9 --project meme-stealer ./build/static && sentry-cli sourcemaps upload --org home-sr9 --project meme-stealer ./build/static"
   },
   "dependencies": {
-    "@sentry/cli": "^3.1.0",
-    "@sentry/react": "^10.38.0",
+    "@sentry/cli": "^3.3.3",
+    "@sentry/react": "^10.45.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
@@ -23,7 +23,7 @@
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "react-scripts": "^5.0.1",
-    "web-vitals": "^2.1.4"
+    "web-vitals": "^5.1.0"
   },
   "eslintConfig": {
     "extends": [
@@ -46,6 +46,6 @@
   "devDependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
-    "framer-motion": "^12.30.0"
+    "framer-motion": "^12.38.0"
   }
 }
