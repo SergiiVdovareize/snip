@@ -80,10 +80,11 @@ const MemeField = () => {
     const stealMeme = async (event) => {
         event.preventDefault()
 
-        setErrorMessage(false)
+        setErrorMessage(null)
         const sanitizedSource = validateMeme(urlValue)
         if (!sanitizedSource) {
             setIsError(true)
+            setErrorMessage('URL is not supported')
             return;
         }
 
@@ -93,8 +94,9 @@ const MemeField = () => {
         if (result.success === true && result.data) {
             console.log('result', result)
             downloadURI(result.data)
-        } else if (result.error) {
-            setErrorMessage(result.error);
+        } else {
+            const errorMsg = result.error || (result.data && result.data.message) || 'Unknown error occurred';
+            setErrorMessage(errorMsg);
         }
 
         return false;
