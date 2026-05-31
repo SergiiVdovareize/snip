@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import StealingService from "../utils/StealService";
 import Constants from "../utils/Constants";
 
@@ -12,6 +12,7 @@ const MemeField = () => {
     const [errorMessage, setErrorMessage] = useState(null)
     const [urlValue, setUrlValue] = useState('')
     const [stealingButtonLabel, setStealingButtonLabel] = useState(defaultStealingButtonLabel)
+    const textareaRef = useRef(null)
 
     useEffect(() => {
         if (isStealing) {
@@ -220,9 +221,21 @@ const MemeField = () => {
     }
 
     const pasteMeme = async () => {
-        const text = await navigator.clipboard.readText();
-        setUrlValue(text);
         setIsError(false);
+        // Focus the textarea and trigger native paste to avoid iOS Safari
+        // clipboard permission prompt
+        if (textareaRef.current) {
+            textareaRef.current.focus();
+            const pasted = document.execCommand('paste');
+            if (!pasted && navigator.clipboard?.readText) {
+                try {
+                    const text = await navigator.clipboard.readText();
+                    setUrlValue(text);
+                } catch (e) {
+                    console.error('Paste failed:', e);
+                }
+            }
+        }
     }
 
     const isFormDisabled = isStealing || isDownloading;
@@ -231,6 +244,7 @@ const MemeField = () => {
         <form action="#" onSubmit={stealMeme} className={isError ? 'error-form' : null}>
             <div style={{ position: 'relative', marginBottom: '0.75em' }}>
                 <textarea 
+                    ref={textareaRef}
                     disabled={isFormDisabled} 
                     rows={4} 
                     name='source' 
