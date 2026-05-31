@@ -39,7 +39,7 @@ const MemeField = () => {
     const downloadURI = (uri, name) => {
         var link = document.createElement("a");
         link.href = uri;
-        link.download = 'stolen-at-' + Date.now();
+        link.download = name || 'stolen-at-' + Date.now();
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -91,11 +91,20 @@ const MemeField = () => {
         setIsStealing(true)
         const result = await StealingService.stealMeme(sanitizedSource)
         setIsStealing(false)
-        if (result.success === true && result.data) {
+        if (result.success === true && result.media && result.media.length > 0) {
             console.log('result', result)
-            downloadURI(result.data)
+            const bestMedia = result.media[0]
+            
+            // Construct a safe filename based on the title and format if available
+            const sanitizeFilename = (text) => text ? text.replace(/[^a-z0-9]/gi, '_').toLowerCase().slice(0, 50) : '';
+            const extension = bestMedia.format ? `.${bestMedia.format}` : '';
+            const filename = sanitizeFilename(result.title)
+                ? `${sanitizeFilename(result.title)}${extension}`
+                : `stolen-at-${Date.now()}${extension}`;
+                
+            downloadURI(bestMedia.url, filename)
         } else {
-            const errorMsg = result.error || (result.data && result.data.message) || 'Unknown error occurred';
+            const errorMsg = result.error || 'Unknown error occurred';
             setErrorMessage(errorMsg);
         }
 
