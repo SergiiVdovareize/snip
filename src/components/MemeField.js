@@ -63,13 +63,13 @@ const MemeField = () => {
             if (totalBytes === 0) {
                 downloadInterval = setInterval(() => {
                     setDownloadProgress((prev) => {
-                        if (prev < 95) {
-                            const increment = Math.max(1, Math.round((95 - prev) * 0.08));
+                        if (prev < 10) {
+                            const increment = Math.max(1, Math.round((95 - prev) * 0.01));
                             return prev + increment;
                         }
                         return prev;
                     });
-                }, 300);
+                }, 1000);
             }
 
             while (true) {
@@ -157,11 +157,11 @@ const MemeField = () => {
         let emulatedProgress = 0;
         const progressInterval = setInterval(() => {
             if (emulatedProgress < 90) {
-                const increment = Math.max(1, Math.round((90 - emulatedProgress) * 0.1));
+                const increment = Math.max(1, Math.round((90 - emulatedProgress) * 0.03));
                 emulatedProgress += increment;
                 setDownloadProgress(emulatedProgress);
             }
-        }, 400);
+        }, 600);
 
         let result;
         try {
