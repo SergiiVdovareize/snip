@@ -3,6 +3,13 @@ import Constants from './Constants';
 const getResult = async (url) => {
     try {
         const data = await fetch(url);
+        if (!data.ok) {
+            return {
+                success: false,
+                status: data.status,
+                error: `HTTP error! Status: ${data.status}`,
+            };
+        }
         const json = await data.json();
         return json;
 
@@ -29,6 +36,13 @@ const getResult = async (url) => {
 const getAsyncResult = async (url) => {
     try {
         const data = await fetch(url);
+        if (!data.ok) {
+            return {
+                success: false,
+                status: data.status,
+                error: `HTTP error! Status: ${data.status}`,
+            };
+        }
         const json = await data.json();
 
         if (json.success) {

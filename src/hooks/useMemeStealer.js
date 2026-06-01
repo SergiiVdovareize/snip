@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/react';
 import { useState } from 'react';
 import { prepareFilename } from '../utils/filename';
 import StealingService from '../utils/StealService';
@@ -66,6 +67,20 @@ const useMemeStealer = () => {
             setIsIndeterminate(false);
             const errorMsg = result.error || 'Unknown error occurred';
             setErrorMessage(errorMsg);
+
+            if (result.status === 504 || result.status === 502) {
+                Sentry.captureMessage(
+                    `Server Gateway Timeout (${result.status}) during scraping`,
+                    {
+                        level: 'error',
+                        extra: {
+                            url: sanitizedSource,
+                            status: result.status,
+                            error: errorMsg,
+                        },
+                    },
+                );
+            }
         }
 
         return false;

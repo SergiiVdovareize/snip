@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/react';
 import { useState } from 'react';
 import Constants from '../utils/Constants';
 
@@ -21,6 +22,21 @@ const useMemeDownloader = () => {
         try {
             const requestUrl = `${Constants.DOWNLOAD}?url=${encodeURIComponent(directMediaUrl)}&filename=${encodeURIComponent(filename)}`;
             const response = await fetch(requestUrl);
+
+            if (response.status === 504 || response.status === 502) {
+                Sentry.captureMessage(
+                    `Server Gateway Timeout (${response.status}) during download`,
+                    {
+                        level: 'error',
+                        extra: {
+                            url: directMediaUrl,
+                            status: response.status,
+                        },
+                    },
+                );
+                throw new Error(`Server Gateway Timeout (${response.status})`);
+            }
+
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }

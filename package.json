@@ -1,56 +1,56 @@
 {
-    "name": "Snip",
-    "version": "0.3.2",
-    "homepage": "https://snip.vdovareize.me",
-    "private": true,
-    "scripts": {
-        "start": "PORT=3003 react-scripts start",
-        "build": "react-scripts build && npm run sentry:sourcemaps && npm run sentry:sourcemaps",
-        "test": "react-scripts test",
-        "eject": "react-scripts eject",
-        "predeploy": "yarn build",
-        "deploy": "gh-pages -d build",
-        "postdeploy": "echo 'Reactive deployment initialized'",
-        "sentry:sourcemaps": "sentry-cli sourcemaps inject --org home-sr9 --project meme-stealer ./build/static && sentry-cli sourcemaps upload --org home-sr9 --project meme-stealer ./build/static",
-        "lint": "biome lint .",
-        "format": "biome format --write .",
-        "check": "biome check --write .",
-        "coverage": "CI=true react-scripts test --coverage"
-    },
-    "dependencies": {
-        "@sentry/cli": "^3.3.3",
-        "@sentry/react": "^10.45.0",
-        "@testing-library/jest-dom": "^6.9.1",
-        "@testing-library/react": "^16.3.2",
-        "@testing-library/user-event": "^14.6.1",
-        "gh-pages": "^6.3.0",
-        "react": "^19.2.4",
-        "react-dom": "^19.2.4",
-        "react-scripts": "^5.0.1",
-        "web-vitals": "^5.1.0"
-    },
-    "eslintConfig": {
-        "extends": [
-            "react-app",
-            "react-app/jest"
-        ]
-    },
-    "browserslist": {
-        "production": [
-            ">0.2%",
-            "not dead",
-            "not op_mini all"
-        ],
-        "development": [
-            "last 1 chrome version",
-            "last 1 firefox version",
-            "last 1 safari version"
-        ]
-    },
-    "devDependencies": {
-        "@biomejs/biome": "2.4.16",
-        "@emotion/react": "^11.14.0",
-        "@emotion/styled": "^11.14.1",
-        "framer-motion": "^12.38.0"
-    }
+  "name": "Snip",
+  "version": "1.0.1",
+  "homepage": "https://snip.vdovareize.me",
+  "private": true,
+  "scripts": {
+    "start": "PORT=3003 react-scripts start",
+    "build": "react-scripts build && npm run sentry:sourcemaps && npm run sentry:sourcemaps",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "predeploy": "yarn build",
+    "deploy": "gh-pages -d build",
+    "postdeploy": "echo 'Reactive deployment initialized'",
+    "sentry:sourcemaps": "sentry-cli sourcemaps inject --org home-sr9 --project meme-stealer ./build/static && sentry-cli sourcemaps upload --org home-sr9 --project meme-stealer ./build/static",
+    "lint": "biome lint .",
+    "format": "biome format --write .",
+    "check": "biome check --write .",
+    "coverage": "CI=true react-scripts test --coverage"
+  },
+  "dependencies": {
+    "@sentry/cli": "^3.3.3",
+    "@sentry/react": "^10.45.0",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
+    "gh-pages": "^6.3.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "react-scripts": "^5.0.1",
+    "web-vitals": "^5.1.0"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.4.16",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "framer-motion": "^12.38.0"
+  }
 }
