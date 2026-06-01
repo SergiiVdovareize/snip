@@ -4,13 +4,25 @@
 
 ## Features
 
-- **Multi-Platform Support**: Download videos from:
-  - TikTok
-  - Instagram (Reels & Posts)
+- **Multi-Platform Support**: Download media (video, image, audio) from:
+  - TikTok & Douyin
+  - Instagram (Reels, Posts & Stories)
   - Twitter/X
   - YouTube (Videos & Shorts)
   - Facebook (Reels & Posts)
-  - LinkedIn Posts
+  - Reddit
+  - Pinterest
+  - Threads
+  - LinkedIn
+  - Snapchat
+  - SoundCloud
+  - Spotify
+  - Tumblr
+  - Kuaishou
+  - Dailymotion
+  - Bluesky
+  - Capcut
+  - Terabox
 
 - **Simple Interface**: Clean, user-friendly design with minimal steps
 - **One-Click Download**: Paste URL and download with a single click
@@ -32,12 +44,24 @@ Visit the live application: [https://snip.vdovareize.me](https://snip.vdovareize
 
 ## Supported URL Formats
 
-- **TikTok**: `https://www.tiktok.com/@username/video/123456789`
-- **Instagram**: `https://www.instagram.com/reels/ABC123/` or `https://www.instagram.com/p/ABC123/`
-- **Twitter/X**: `https://twitter.com/username/status/123456789` or `https://x.com/username/status/123456789`
-- **YouTube**: `https://www.youtube.com/watch?v=ABC123` or `https://youtu.be/ABC123` or `https://www.youtube.com/shorts/ABC123`
+- **TikTok / Douyin**: `https://www.tiktok.com/@username/video/123456789` or `https://www.douyin.com/video/123456789`
+- **Instagram**: `https://www.instagram.com/reels/ABC123/`, `https://www.instagram.com/p/ABC123/` or `instagr.am` shortcuts
+- **Twitter / X**: `https://twitter.com/username/status/123456789` or `https://x.com/username/status/123456789`
+- **YouTube**: `https://www.youtube.com/watch?v=ABC123`, `https://youtu.be/ABC123` or `https://www.youtube.com/shorts/ABC123`
 - **Facebook**: `https://www.facebook.com/reel/123456789` or `https://www.facebook.com/share/r/ABC123/`
-- **LinkedIn**: `https://www.linkedin.com/posts/username-123456789`
+- **Reddit**: `https://www.reddit.com/r/subreddit/comments/12345/title/`
+- **Pinterest**: `https://www.pinterest.com/pin/12345/` or `https://pin.it/12345`
+- **Threads**: `https://www.threads.net/@username/post/ABC123`
+- **LinkedIn**: `https://www.linkedin.com/posts/username-123456789` or `lnkd.in` redirects
+- **Snapchat**: `https://www.snapchat.com/add/username`
+- **SoundCloud**: `https://soundcloud.com/artist/track`
+- **Spotify**: `https://open.spotify.com/track/ABC123` or `https://spotify.link/ABC123`
+- **Tumblr**: `https://www.tumblr.com/blog/post/123456789` or `tmblr.co` shortcuts
+- **Kuaishou**: `https://kuaishou.com/photo/123456789`
+- **Dailymotion**: `https://www.dailymotion.com/video/x7tg` or `dai.ly` shortcuts
+- **Bluesky**: `https://bsky.app/profile/username/post/ABC123`
+- **Capcut**: `https://www.capcut.com/template/123456789`
+- **Terabox**: `https://terabox.com/s/123456789`
 
 ## License
 
