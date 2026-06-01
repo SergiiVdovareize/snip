@@ -33,7 +33,8 @@ const getResult = async (url) => {
     }
 };
 
-const getAsyncResult = async (url) => {
+// eslint-disable-next-line no-unused-vars
+const _getAsyncResult = async (url) => {
     try {
         const data = await fetch(url);
         if (!data.ok) {
@@ -50,7 +51,7 @@ const getAsyncResult = async (url) => {
         }
 
         if (!json.success && json.status === 2) {
-            return await getAsyncResult(url);
+            return await _getAsyncResult(url);
         }
 
         return {
