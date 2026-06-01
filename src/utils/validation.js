@@ -22,6 +22,8 @@ export const validateMeme = (url) => {
     };
 
     const trimmedUrl = url ? url.trim() : '';
-    const isValid = Object.values(urlPatterns).some(pattern => pattern.test(trimmedUrl));
+    const isValid = Object.values(urlPatterns).some((pattern) =>
+        pattern.test(trimmedUrl),
+    );
     return isValid ? trimmedUrl : null;
 };

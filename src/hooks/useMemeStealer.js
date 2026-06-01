@@ -1,8 +1,8 @@
-import { useState } from "react";
-import StealingService from "../utils/StealService";
-import { validateMeme } from "../utils/validation";
-import { prepareFilename } from "../utils/filename";
-import useMemeDownloader from "./useMemeDownloader";
+import { useState } from 'react';
+import { prepareFilename } from '../utils/filename';
+import StealingService from '../utils/StealService';
+import { validateMeme } from '../utils/validation';
+import useMemeDownloader from './useMemeDownloader';
 
 const useMemeStealer = () => {
     const [isStealing, setIsStealing] = useState(false);
@@ -45,12 +45,16 @@ const useMemeStealer = () => {
             setIsStealing(false);
         }
 
-        if (result.success === true && result.media && result.media.length > 0) {
+        if (
+            result.success === true &&
+            result.media &&
+            result.media.length > 0
+        ) {
             console.log('result', result);
             const bestMedia = result.media[0];
-            
+
             const filename = prepareFilename(result.platform, bestMedia);
-                
+
             try {
                 await downloadMedia(bestMedia.url, filename, bestMedia.sizeMB);
             } catch (err) {

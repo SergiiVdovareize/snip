@@ -1,5 +1,5 @@
-import { useState } from "react";
-import Constants from "../utils/Constants";
+import { useState } from 'react';
+import Constants from '../utils/Constants';
 
 const useMemeDownloader = () => {
     const [isDownloading, setIsDownloading] = useState(false);
@@ -8,9 +8,12 @@ const useMemeDownloader = () => {
 
     const downloadMedia = async (directMediaUrl, filename, sizeMB) => {
         setIsDownloading(true);
-        
+
         const SMALL_FILE_THRESHOLD_MB = 2;
-        const isKnownSmall = sizeMB !== undefined && sizeMB !== null && sizeMB < SMALL_FILE_THRESHOLD_MB;
+        const isKnownSmall =
+            sizeMB !== undefined &&
+            sizeMB !== null &&
+            sizeMB < SMALL_FILE_THRESHOLD_MB;
         if (isKnownSmall) {
             setIsIndeterminate(true);
         }
@@ -24,13 +27,15 @@ const useMemeDownloader = () => {
 
             const contentLength = response.headers.get('content-length');
             const totalBytes = contentLength ? parseInt(contentLength, 10) : 0;
-            
+
             const reader = response.body.getReader();
             const chunks = [];
             let receivedLength = 0;
 
-            const isSizeSmall = isKnownSmall || 
-                (totalBytes > 0 && totalBytes < SMALL_FILE_THRESHOLD_MB * 1024 * 1024) ||
+            const isSizeSmall =
+                isKnownSmall ||
+                (totalBytes > 0 &&
+                    totalBytes < SMALL_FILE_THRESHOLD_MB * 1024 * 1024) ||
                 (sizeMB === undefined && totalBytes === 0);
 
             if (isSizeSmall) {
@@ -46,9 +51,11 @@ const useMemeDownloader = () => {
                 }
                 chunks.push(value);
                 receivedLength += value.length;
-                
+
                 if (totalBytes > 0 && !isSizeSmall) {
-                    const progress = Math.round((receivedLength / totalBytes) * 100);
+                    const progress = Math.round(
+                        (receivedLength / totalBytes) * 100,
+                    );
                     setDownloadProgress((prev) => Math.max(prev, progress));
                 }
             }
@@ -59,14 +66,14 @@ const useMemeDownloader = () => {
 
             const blob = new Blob(chunks);
             const downloadUrl = URL.createObjectURL(blob);
-            
+
             const a = document.createElement('a');
             a.href = downloadUrl;
             a.download = filename;
             document.body.appendChild(a);
             a.click();
             a.remove();
-            
+
             URL.revokeObjectURL(downloadUrl);
         } catch (error) {
             console.error('Download failed:', error);

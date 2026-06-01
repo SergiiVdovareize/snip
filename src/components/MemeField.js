@@ -1,11 +1,11 @@
-import { useEffect, useRef, useState } from "react";
-import useMemeStealer from "../hooks/useMemeStealer";
+import { useEffect, useRef, useState } from 'react';
+import useMemeStealer from '../hooks/useMemeStealer';
 
-const defaultStealingButtonLabel = 'Steal me'
+const defaultStealingButtonLabel = 'Steal me';
 
 const MemeField = () => {
-    const [urlValue, setUrlValue] = useState('')
-    const textareaRef = useRef(null)
+    const [urlValue, setUrlValue] = useState('');
+    const textareaRef = useRef(null);
 
     const {
         stealMeme,
@@ -15,30 +15,32 @@ const MemeField = () => {
         isIndeterminate,
         isError,
         errorMessage,
-        resetErrors
+        resetErrors,
     } = useMemeStealer();
 
-    const [stealingButtonLabel, setStealingButtonLabel] = useState(defaultStealingButtonLabel)
+    const [stealingButtonLabel, setStealingButtonLabel] = useState(
+        defaultStealingButtonLabel,
+    );
 
     useEffect(() => {
         if (isStealing) {
-            setStealingButtonLabel('Stealing.....')
+            setStealingButtonLabel('Stealing.....');
         } else if (isDownloading) {
-            setStealingButtonLabel('Downloading...')
+            setStealingButtonLabel('Downloading...');
         } else {
-            setStealingButtonLabel(defaultStealingButtonLabel)
+            setStealingButtonLabel(defaultStealingButtonLabel);
         }
-    }, [isStealing, isDownloading])
+    }, [isStealing, isDownloading]);
 
     const handleUrlChange = (event) => {
         resetErrors();
         setUrlValue(event.target.value);
-    }
+    };
 
     const resetForm = () => {
-        setUrlValue('')
+        setUrlValue('');
         resetErrors();
-    }
+    };
 
     const pasteMeme = async () => {
         resetErrors();
@@ -56,7 +58,7 @@ const MemeField = () => {
                 }
             }
         }
-    }
+    };
 
     const handleSubmit = (event) => {
         event.preventDefault();
@@ -65,44 +67,66 @@ const MemeField = () => {
 
     const isFormDisabled = isStealing || isDownloading;
 
-    return <div className='container'>
-        <form action="#" onSubmit={handleSubmit} className={isError ? 'error-form' : null}>
-            <div style={{ position: 'relative', marginBottom: '0.75em' }}>
-                <textarea 
-                    ref={textareaRef}
-                    disabled={isFormDisabled} 
-                    rows={4} 
-                    name='source' 
-                    className='meme-source' 
-                    placeholder="Paste url here" 
-                    value={urlValue} 
-                    onChange={handleUrlChange}
-                    style={{ marginBottom: 0, display: 'block' }}
-                />
-                { (isStealing || isDownloading) && (
-                    <div className="progress-container">
-                        {isIndeterminate ? (
-                            <div className="zebra-fill" />
-                        ) : (
-                            <div className="progress-fill" style={{ width: `${downloadProgress}%` }} />
-                        )}
-                    </div>
-                )}
-            </div>
-            
-            <div className="stealing-buttons-wrapper">
-                <input type="reset" disabled={isFormDisabled} className='stealing-button' value='Reset' onClick={resetForm}/>
-                <input type="button" disabled={isFormDisabled} className='stealing-button' value='Paste' onClick={pasteMeme}/>
-                <input type="submit" disabled={isFormDisabled} className='stealing-button meme-stealer' value={stealingButtonLabel}/>
-            </div>
-
-            { errorMessage &&
-                <div className="error">
-                    {errorMessage}
+    return (
+        <div className="container">
+            <form
+                action="#"
+                onSubmit={handleSubmit}
+                className={isError ? 'error-form' : null}
+            >
+                <div style={{ position: 'relative', marginBottom: '0.75em' }}>
+                    <textarea
+                        ref={textareaRef}
+                        disabled={isFormDisabled}
+                        rows={4}
+                        name="source"
+                        className="meme-source"
+                        placeholder="Paste url here"
+                        value={urlValue}
+                        onChange={handleUrlChange}
+                        style={{ marginBottom: 0, display: 'block' }}
+                    />
+                    {(isStealing || isDownloading) && (
+                        <div className="progress-container">
+                            {isIndeterminate ? (
+                                <div className="zebra-fill" />
+                            ) : (
+                                <div
+                                    className="progress-fill"
+                                    style={{ width: `${downloadProgress}%` }}
+                                />
+                            )}
+                        </div>
+                    )}
                 </div>
-            }
-        </form>
-    </div>
-}
+
+                <div className="stealing-buttons-wrapper">
+                    <input
+                        type="reset"
+                        disabled={isFormDisabled}
+                        className="stealing-button"
+                        value="Reset"
+                        onClick={resetForm}
+                    />
+                    <input
+                        type="button"
+                        disabled={isFormDisabled}
+                        className="stealing-button"
+                        value="Paste"
+                        onClick={pasteMeme}
+                    />
+                    <input
+                        type="submit"
+                        disabled={isFormDisabled}
+                        className="stealing-button meme-stealer"
+                        value={stealingButtonLabel}
+                    />
+                </div>
+
+                {errorMessage && <div className="error">{errorMessage}</div>}
+            </form>
+        </div>
+    );
+};
 
 export default MemeField;

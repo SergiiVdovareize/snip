@@ -1,7 +1,7 @@
-import MemeField from "./MemeField";
+import MemeField from './MemeField';
 
 const MainContainer = () => {
-    return <MemeField/>;
-}
+    return <MemeField />;
+};
 
 export default MainContainer;

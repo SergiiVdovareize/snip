@@ -1,9 +1,9 @@
-import Constants from "./Constants";
+import Constants from './Constants';
 
 const getResult = async (url) => {
     try {
-        const data = await fetch(url)
-        const json = await data.json()
+        const data = await fetch(url);
+        const json = await data.json();
         return json;
 
         // if (json.type === 'sync') {
@@ -22,17 +22,17 @@ const getResult = async (url) => {
         return {
             success: false,
             error: error.message,
-        }
+        };
     }
-}
+};
 
 const getAsyncResult = async (url) => {
     try {
-        const data = await fetch(url)
-        const json = await data.json()
-        
+        const data = await fetch(url);
+        const json = await data.json();
+
         if (json.success) {
-            return json
+            return json;
         }
 
         if (!json.success && json.status === 2) {
@@ -42,21 +42,21 @@ const getAsyncResult = async (url) => {
         return {
             success: false,
             error: json.error || json.message || 'unknown issue',
-        }
+        };
     } catch (error) {
         return {
             success: false,
             error: error.message,
-        }
+        };
     }
-}
+};
 
 const StealingService = {
     async stealMeme(memeUrl) {
-        return await getResult(`${Constants.MEME_STEALER_URL}/${encodeURIComponent(memeUrl)}`)
-    }
-}
+        return await getResult(
+            `${Constants.MEME_STEALER_URL}/${encodeURIComponent(memeUrl)}`,
+        );
+    },
+};
 
-
-
-export default StealingService
+export default StealingService;

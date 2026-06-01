@@ -1,218 +1,225 @@
 :root {
-  /* Dark, shadowy theme */
-  --bg: #2a313e;           /* almost black with a hint of blue */
-  --panel: #3f4c5e;        /* input/panel background */
-  --text: #e6eef8;         /* light text for contrast */
-  --muted: #8b98a8;        /* muted text */
-  --border: #273449;       /* subtle border */
-  --accent: #0b5ed7;       /* stealing action accent */
-  --accent-dark: #083e90;  /* darker accent for hover */
-  --accent-shadow: rgba(3,32,80,0.6);
-  --btn-shadow: rgba(2,8,23,0.6);
-  --danger: #ff6b6b;       /* errors */
+    /* Dark, shadowy theme */
+    --bg: #2a313e; /* almost black with a hint of blue */
+    --panel: #3f4c5e; /* input/panel background */
+    --text: #e6eef8; /* light text for contrast */
+    --muted: #8b98a8; /* muted text */
+    --border: #273449; /* subtle border */
+    --accent: #0b5ed7; /* stealing action accent */
+    --accent-dark: #083e90; /* darker accent for hover */
+    --accent-shadow: rgba(3, 32, 80, 0.6);
+    --btn-shadow: rgba(2, 8, 23, 0.6);
+    --danger: #ff6b6b; /* errors */
 }
 
 body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background-color: var(--bg);
-  color: var(--text);
+    margin: 0;
+    font-family:
+        -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+        "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+        sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: var(--bg);
+    color: var(--text);
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
-  color: var(--text);
+    font-family:
+        source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
+    color: var(--text);
 }
 
 .container {
-  padding: 1rem;
-  max-width: 900px;
-  margin: 0 auto;
-  margin-top: 6rem;
+    padding: 1rem;
+    max-width: 900px;
+    margin: 0 auto;
+    margin-top: 6rem;
 }
 
 .meme-source {
-  box-sizing: border-box;
-  width: 100%;
-  font-size: 18px;
-  padding: 0.6em;
-  margin-bottom: 0.75em;
-  resize: none;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-  'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-  sans-serif;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  background-color: var(--panel);
-  color: var(--text);
+    box-sizing: border-box;
+    width: 100%;
+    font-size: 18px;
+    padding: 0.6em;
+    margin-bottom: 0.75em;
+    resize: none;
+    font-family:
+        -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+        "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+        sans-serif;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background-color: var(--panel);
+    color: var(--text);
 }
 
 .meme-source::placeholder {
-  color: var(--muted);
+    color: var(--muted);
 }
 
 .stealing-buttons-wrapper {
-  display: flex;
-  gap: 0.6em;
+    display: flex;
+    gap: 0.6em;
 }
 
 .stealing-button {
-  font-size: 18px;
-  width: 100%;
-  padding: 0.6em 0.8em;
-  border-radius: 6px;
-  background-color: var(--panel);
-  color: var(--text);
-  cursor: pointer;
-  border: 1px solid var(--panel);
-  box-shadow: 0 6px 0 var(--btn-shadow);
-  transition: transform 120ms ease, box-shadow 160ms ease;
-} 
+    font-size: 18px;
+    width: 100%;
+    padding: 0.6em 0.8em;
+    border-radius: 6px;
+    background-color: var(--panel);
+    color: var(--text);
+    cursor: pointer;
+    border: 1px solid var(--panel);
+    box-shadow: 0 6px 0 var(--btn-shadow);
+    transition:
+        transform 120ms ease,
+        box-shadow 160ms ease;
+}
 
 .stealing-button:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
+    opacity: 0.55;
+    cursor: not-allowed;
 }
 
 .stealing-button:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 7px 0 var(--btn-shadow);
-} 
+    transform: translateY(-1px);
+    box-shadow: 0 7px 0 var(--btn-shadow);
+}
 
 .stealing-button:active:not(:disabled) {
-  transform: translateY(3px);
-  box-shadow: 0 4px 0 var(--btn-shadow);
-} 
+    transform: translateY(3px);
+    box-shadow: 0 4px 0 var(--btn-shadow);
+}
 
 /* Primary accent button for stealing */
 .meme-stealer {
-  background-color: var(--accent);
-  color: white !important;
-  border: none;
-  box-shadow: 0 6px 0 var(--accent-shadow);
-  /* border-bottom: 3px solid rgba(0,0,0,0.45); */
+    background-color: var(--accent);
+    color: white !important;
+    border: none;
+    box-shadow: 0 6px 0 var(--accent-shadow);
+    /* border-bottom: 3px solid rgba(0,0,0,0.45); */
 }
 
 .meme-stealer:hover:not(:disabled) {
-  box-shadow: 0 7px 0 var(--accent-shadow);
-} 
+    box-shadow: 0 7px 0 var(--accent-shadow);
+}
 
 .meme-stealer:active:not(:disabled) {
-  transform: translateY(3px);
-  box-shadow: 0 4px 0 var(--accent-shadow);
+    transform: translateY(3px);
+    box-shadow: 0 4px 0 var(--accent-shadow);
 }
 
 .error-form textarea {
-  color: var(--text);
-  border-color: rgba(255, 0, 0, 0.35);
-  background-color: rgba(255,0,0,0.03);
-} 
+    color: var(--text);
+    border-color: rgba(255, 0, 0, 0.35);
+    background-color: rgba(255, 0, 0, 0.03);
+}
 
 .error {
-  margin: 1em 0;
-  color: var(--danger);
+    margin: 1em 0;
+    color: var(--danger);
 }
 
 @media (max-width: 480px) {
-  .container { padding: 0.75rem; }
-  .stealing-button { font-size: 16px; padding: 0.5em; }
+    .container {
+        padding: 0.75rem;
+    }
+    .stealing-button {
+        font-size: 16px;
+        padding: 0.5em;
+    }
 }
 
 /* Progress bar container and animation styles */
 .progress-container {
-  position: absolute;
-  bottom: 1px;
-  left: 1px;
-  right: 1px;
-  height: 6px;
-  border-bottom-left-radius: 5px;
-  border-bottom-right-radius: 5px;
-  overflow: hidden;
-  pointer-events: none;
+    position: absolute;
+    bottom: 1px;
+    left: 1px;
+    right: 1px;
+    height: 6px;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    overflow: hidden;
+    pointer-events: none;
 }
 
 .progress-fill {
-  height: 100%;
-  background-color: var(--accent);
-  transition: width 150ms ease-out;
+    height: 100%;
+    background-color: var(--accent);
+    transition: width 150ms ease-out;
 }
 
 .zebra-fill {
-  width: 100%;
-  height: 100%;
-  background-color: var(--accent);
-  background-image: linear-gradient(
-    45deg,
-    rgba(255, 255, 255, 0.25) 25%,
-    transparent 25%,
-    transparent 50%,
-    rgba(255, 255, 255, 0.25) 50%,
-    rgba(255, 255, 255, 0.25) 75%,
-    transparent 75%,
-    transparent
-  );
-  background-size: 20px 20px;
-  animation: move-zebra 0.8s linear infinite;
+    width: 100%;
+    height: 100%;
+    background-color: var(--accent);
+    background-image: linear-gradient(
+        45deg,
+        rgba(255, 255, 255, 0.25) 25%,
+        transparent 25%,
+        transparent 50%,
+        rgba(255, 255, 255, 0.25) 50%,
+        rgba(255, 255, 255, 0.25) 75%,
+        transparent 75%,
+        transparent
+    );
+    background-size: 20px 20px;
+    animation: move-zebra 0.8s linear infinite;
 }
 
 @keyframes move-zebra {
-  0% {
-    background-position: 0 0;
-  }
-  100% {
-    background-position: 20px 0;
-  }
+    0% {
+        background-position: 0 0;
+    }
+    100% {
+        background-position: 20px 0;
+    }
 }
-
 
 /* Progress bar container and animation styles */
 .progress-container {
-  position: absolute;
-  bottom: 1px;
-  left: 1px;
-  right: 1px;
-  height: 6px;
-  border-bottom-left-radius: 5px;
-  border-bottom-right-radius: 5px;
-  overflow: hidden;
-  pointer-events: none;
+    position: absolute;
+    bottom: 1px;
+    left: 1px;
+    right: 1px;
+    height: 6px;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    overflow: hidden;
+    pointer-events: none;
 }
 
 .progress-fill {
-  height: 100%;
-  background-color: var(--accent);
-  transition: width 150ms ease-out;
+    height: 100%;
+    background-color: var(--accent);
+    transition: width 150ms ease-out;
 }
 
 .zebra-fill {
-  width: 100%;
-  height: 100%;
-  background-color: var(--accent);
-  background-image: linear-gradient(
-    45deg,
-    rgba(255, 255, 255, 0.25) 25%,
-    transparent 25%,
-    transparent 50%,
-    rgba(255, 255, 255, 0.25) 50%,
-    rgba(255, 255, 255, 0.25) 75%,
-    transparent 75%,
-    transparent
-  );
-  background-size: 20px 20px;
-  animation: move-zebra 0.8s linear infinite;
+    width: 100%;
+    height: 100%;
+    background-color: var(--accent);
+    background-image: linear-gradient(
+        45deg,
+        rgba(255, 255, 255, 0.25) 25%,
+        transparent 25%,
+        transparent 50%,
+        rgba(255, 255, 255, 0.25) 50%,
+        rgba(255, 255, 255, 0.25) 75%,
+        transparent 75%,
+        transparent
+    );
+    background-size: 20px 20px;
+    animation: move-zebra 0.8s linear infinite;
 }
 
 @keyframes move-zebra {
-  0% {
-    background-position: 0 0;
-  }
-  100% {
-    background-position: 20px 0;
-  }
+    0% {
+        background-position: 0 0;
+    }
+    100% {
+        background-position: 20px 0;
+    }
 }
-
