@@ -8,6 +8,7 @@ const MemeField = () => {
     const [isStealing, setIsStealing] = useState(false)
     const [isDownloading, setIsDownloading] = useState(false)
     const [downloadProgress, setDownloadProgress] = useState(0)
+    const [isIndeterminate, setIsIndeterminate] = useState(false)
     const [isError, setIsError] = useState(false)
     const [errorMessage, setErrorMessage] = useState(null)
     const [urlValue, setUrlValue] = useState('')
@@ -42,10 +43,15 @@ const MemeField = () => {
         setErrorMessage(null)
     }
 
-    const downloadMedia = async (directMediaUrl, filename) => {
+    const downloadMedia = async (directMediaUrl, filename, sizeMB) => {
         setIsDownloading(true);
-        // Do not reset downloadProgress to 0 to keep progress continuous
-        let downloadInterval = null;
+        
+        const SMALL_FILE_THRESHOLD_MB = 2;
+        const isKnownSmall = sizeMB !== undefined && sizeMB !== null && sizeMB < SMALL_FILE_THRESHOLD_MB;
+        if (isKnownSmall) {
+            setIsIndeterminate(true);
+        }
+
         try {
             const requestUrl = `${Constants.DOWNLOAD}?url=${encodeURIComponent(directMediaUrl)}&filename=${encodeURIComponent(filename)}`;
             const response = await fetch(requestUrl);
@@ -60,17 +66,14 @@ const MemeField = () => {
             const chunks = [];
             let receivedLength = 0;
 
-            // Start emulated progress for downloads where Content-Length is missing
-            if (totalBytes === 0) {
-                downloadInterval = setInterval(() => {
-                    setDownloadProgress((prev) => {
-                        if (prev < 10) {
-                            const increment = Math.max(1, Math.round((95 - prev) * 0.01));
-                            return prev + increment;
-                        }
-                        return prev;
-                    });
-                }, 1000);
+            const isSizeSmall = isKnownSmall || 
+                (totalBytes > 0 && totalBytes < SMALL_FILE_THRESHOLD_MB * 1024 * 1024) ||
+                (sizeMB === undefined && totalBytes === 0);
+
+            if (isSizeSmall) {
+                setIsIndeterminate(true);
+            } else {
+                setIsIndeterminate(false);
             }
 
             while (true) {
@@ -81,16 +84,13 @@ const MemeField = () => {
                 chunks.push(value);
                 receivedLength += value.length;
                 
-                if (totalBytes > 0) {
+                if (totalBytes > 0 && !isSizeSmall) {
                     const progress = Math.round((receivedLength / totalBytes) * 100);
                     setDownloadProgress((prev) => Math.max(prev, progress));
                 }
             }
 
-            if (downloadInterval) {
-                clearInterval(downloadInterval);
-            }
-
+            setIsIndeterminate(false);
             setDownloadProgress(100);
             await new Promise((resolve) => setTimeout(resolve, 250)); // Briefly show 100% completion
 
@@ -106,15 +106,13 @@ const MemeField = () => {
             
             URL.revokeObjectURL(downloadUrl);
         } catch (error) {
-            if (downloadInterval) {
-                clearInterval(downloadInterval);
-            }
             console.error('Download failed:', error);
             setIsError(true);
             setErrorMessage(`Download failed: ${error.message}`);
         } finally {
             setIsDownloading(false);
             setDownloadProgress(0);
+            setIsIndeterminate(false);
         }
     };
 
@@ -152,17 +150,8 @@ const MemeField = () => {
         }
 
         setIsStealing(true)
+        setIsIndeterminate(true)
         setDownloadProgress(0)
-        
-        // Start emulating progress while waiting for the scraper API response
-        let emulatedProgress = 0;
-        const progressInterval = setInterval(() => {
-            if (emulatedProgress < 90) {
-                const increment = Math.max(1, Math.round((90 - emulatedProgress) * 0.03));
-                emulatedProgress += increment;
-                setDownloadProgress(emulatedProgress);
-            }
-        }, 600);
 
         let result;
         try {
@@ -170,9 +159,7 @@ const MemeField = () => {
         } catch (err) {
             result = { success: false, error: err.message };
         } finally {
-            clearInterval(progressInterval);
             setIsStealing(false);
-            // Do not reset downloadProgress to 0 to keep the progress bar continuous
         }
 
         if (result.success === true && result.media && result.media.length > 0) {
@@ -181,9 +168,10 @@ const MemeField = () => {
             
             const filename = prepareFilename(result.platform, bestMedia);
                 
-            await downloadMedia(bestMedia.url, filename)
+            await downloadMedia(bestMedia.url, filename, bestMedia.sizeMB)
         } else {
             setDownloadProgress(0); // Reset progress on failure
+            setIsIndeterminate(false);
             const errorMsg = result.error || 'Unknown error occurred';
             setErrorMessage(errorMsg);
         }
@@ -193,17 +181,26 @@ const MemeField = () => {
 
     const validateMeme = (url) => {
         const urlPatterns = {
-            tiktok: /^https?:\/\/(www\.)?tiktok\.com\/@[\w.-]+\/video\/\d+/,
-            instagram: /^https?:\/\/(www\.)?instagram\.com\/(reels?|p|stories)\/[\w.-]+/,
-            twitter: /^https?:\/\/(www\.)?(twitter|x)\.com\/[\w.-]+\/status\/\d+/,
-            youtube: /^https?:\/\/(www\.)?(youtube\.com|youtu\.be)\/(watch\?v=|shorts\/)[\w-]+/,
-            facebook: /^https?:\/\/(www\.)?facebook\.com\/(reel\/|.+\/posts\/|watch\/\?v=)\d+/,
-            facebookShare: /^https?:\/\/(www\.)?facebook\.com\/share\/r\/[\w-]+/,
-            linkedin: /^https?:\/\/(www\.)?linkedin\.com\/posts\/[\w-]+/,
-            threads: /^https?:\/\/(www\.)?threads\.(net|com)\/(@[\w.-]+)\/post\/[\w-]+/,
+            tiktok: /tiktok\.com/i,
+            instagram: /instagram\.com|instagr\.am/i,
+            facebook: /facebook\.com|fb\.watch|\bfb\.com/i,
+            twitter: /twitter\.com|\bx\.com/i,
+            youtube: /youtube\.com|youtu\.be/i,
+            reddit: /reddit\.com/i,
+            pinterest: /pinterest\.|pin\.it/i,
+            threads: /threads\.(net|com)/i,
+            linkedin: /linkedin\.com|lnkd\.in/i,
+            snapchat: /snapchat\.com/i,
+            soundcloud: /soundcloud\.com/i,
+            spotify: /spotify\.com|spotify\.link/i,
+            tumblr: /tumblr\.com|tmblr\.co/i,
+            douyin: /douyin\.com/i,
+            kuaishou: /kuaishou\.com/i,
+            dailymotion: /dailymotion\.com|dai\.ly/i,
+            bluesky: /bsky\.app/i,
+            capcut: /capcut\.com/i,
+            terabox: /terabox\.com/i,
         };
-
-        // TODO: ADD - https://fb.watch/u_MnTouOL5/
 
 
         const trimmedUrl = url.trim();
@@ -255,23 +252,12 @@ const MemeField = () => {
                     style={{ marginBottom: 0, display: 'block' }}
                 />
                 { (isStealing || isDownloading) && (
-                    <div style={{
-                        position: 'absolute',
-                        bottom: '1px',
-                        left: '1px',
-                        right: '1px',
-                        height: '6px',
-                        borderBottomLeftRadius: '5px',
-                        borderBottomRightRadius: '5px',
-                        overflow: 'hidden',
-                        pointerEvents: 'none'
-                    }}>
-                        <div style={{
-                            width: `${downloadProgress}%`,
-                            height: '100%',
-                            backgroundColor: 'var(--accent)',
-                            transition: 'width 150ms ease-out'
-                        }} />
+                    <div className="progress-container">
+                        {isIndeterminate ? (
+                            <div className="zebra-fill" />
+                        ) : (
+                            <div className="progress-fill" style={{ width: `${downloadProgress}%` }} />
+                        )}
                     </div>
                 )}
             </div>

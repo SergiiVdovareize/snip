@@ -122,3 +122,97 @@ code {
   .container { padding: 0.75rem; }
   .stealing-button { font-size: 16px; padding: 0.5em; }
 }
+
+/* Progress bar container and animation styles */
+.progress-container {
+  position: absolute;
+  bottom: 1px;
+  left: 1px;
+  right: 1px;
+  height: 6px;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.progress-fill {
+  height: 100%;
+  background-color: var(--accent);
+  transition: width 150ms ease-out;
+}
+
+.zebra-fill {
+  width: 100%;
+  height: 100%;
+  background-color: var(--accent);
+  background-image: linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.25) 25%,
+    transparent 25%,
+    transparent 50%,
+    rgba(255, 255, 255, 0.25) 50%,
+    rgba(255, 255, 255, 0.25) 75%,
+    transparent 75%,
+    transparent
+  );
+  background-size: 20px 20px;
+  animation: move-zebra 0.8s linear infinite;
+}
+
+@keyframes move-zebra {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 20px 0;
+  }
+}
+
+
+/* Progress bar container and animation styles */
+.progress-container {
+  position: absolute;
+  bottom: 1px;
+  left: 1px;
+  right: 1px;
+  height: 6px;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.progress-fill {
+  height: 100%;
+  background-color: var(--accent);
+  transition: width 150ms ease-out;
+}
+
+.zebra-fill {
+  width: 100%;
+  height: 100%;
+  background-color: var(--accent);
+  background-image: linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.25) 25%,
+    transparent 25%,
+    transparent 50%,
+    rgba(255, 255, 255, 0.25) 50%,
+    rgba(255, 255, 255, 0.25) 75%,
+    transparent 75%,
+    transparent
+  );
+  background-size: 20px 20px;
+  animation: move-zebra 0.8s linear infinite;
+}
+
+@keyframes move-zebra {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 20px 0;
+  }
+}
+
