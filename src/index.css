@@ -96,7 +96,7 @@ code {
 /* Primary accent button for stealing */
 .meme-stealer {
     background-color: var(--accent);
-    color: white !important;
+    color: white;
     border: none;
     box-shadow: 0 6px 0 var(--accent-shadow);
     /* border-bottom: 3px solid rgba(0,0,0,0.45); */

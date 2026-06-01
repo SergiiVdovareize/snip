@@ -14,7 +14,8 @@
         "sentry:sourcemaps": "sentry-cli sourcemaps inject --org home-sr9 --project meme-stealer ./build/static && sentry-cli sourcemaps upload --org home-sr9 --project meme-stealer ./build/static",
         "lint": "biome lint .",
         "format": "biome format --write .",
-        "check": "biome check --write ."
+        "check": "biome check --write .",
+        "coverage": "CI=true react-scripts test --coverage"
     },
     "dependencies": {
         "@sentry/cli": "^3.3.3",
