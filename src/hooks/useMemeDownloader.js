@@ -21,7 +21,38 @@ const useMemeDownloader = () => {
 
         try {
             const requestUrl = `${Constants.DOWNLOAD}?url=${encodeURIComponent(directMediaUrl)}&filename=${encodeURIComponent(filename)}`;
-            const response = await fetch(requestUrl);
+            let response = await fetch(requestUrl);
+
+            if (response.status === 403) {
+                try {
+                    const clone = response.clone();
+                    const errJson = await clone.json();
+                    if (
+                        errJson &&
+                        errJson.statusCode === 403 &&
+                        errJson.message === 'Failed to fetch media: Forbidden'
+                    ) {
+                        try {
+                            response = await fetch(directMediaUrl);
+                            if (!response.ok) {
+                                throw new Error(`HTTP error! Status: ${response.status}`);
+                            }
+                        } catch (directErr) {
+                            const a = document.createElement('a');
+                            a.href = directMediaUrl;
+                            a.target = '_blank';
+                            a.rel = 'noopener noreferrer';
+                            a.download = filename;
+                            document.body.appendChild(a);
+                            a.click();
+                            a.remove();
+                            return;
+                        }
+                    }
+                } catch (jsonErr) {
+                    // Ignore JSON parsing issues and proceed with original response status check
+                }
+            }
 
             if (response.status === 504 || response.status === 502) {
                 Sentry.captureMessage(
