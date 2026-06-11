@@ -24,3 +24,7 @@ yarn-error.log*
 # Sentry Config File
 .sentryclirc
 .env
+*.pem
+
+# Python virtual environment
+.venv
