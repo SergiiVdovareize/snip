@@ -50,7 +50,6 @@ const useMemeStealer = () => {
             result.media &&
             result.media.length > 0
         ) {
-            console.log('result', result);
             const bestMedia = result.media[0];
 
             const filename = prepareFilename(result.platform, bestMedia);
