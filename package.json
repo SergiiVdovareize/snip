@@ -11,7 +11,7 @@
         "predeploy": "yarn build",
         "deploy": "gh-pages -d build",
         "postdeploy": "echo 'Reactive deployment initialized'",
-        "sentry:sourcemaps": "sentry-cli sourcemaps inject --org home-sr9 --project meme-stealer ./build/static && sentry-cli sourcemaps upload --org home-sr9 --project meme-stealer ./build/static",
+        "sentry:sourcemaps": "sentry-cli sourcemaps inject --org home-api --project meme-stealer ./build/static && sentry-cli sourcemaps upload --org home-api --project meme-stealer ./build/static",
         "lint": "biome lint .",
         "format": "biome format --write .",
         "check": "biome check --write .",
