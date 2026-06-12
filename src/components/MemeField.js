@@ -15,6 +15,7 @@ const MemeField = () => {
         isIndeterminate,
         isError,
         errorMessage,
+        infoMessage,
         resetErrors,
     } = useMemeStealer();
 
@@ -124,6 +125,7 @@ const MemeField = () => {
                 </div>
 
                 {errorMessage && <div className="error">{errorMessage}</div>}
+                {infoMessage && <div className="info">{infoMessage}</div>}
             </form>
         </div>
     );

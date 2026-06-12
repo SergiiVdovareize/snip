@@ -19,6 +19,7 @@ describe('MemeField Component', () => {
             isIndeterminate: false,
             isError: false,
             errorMessage: null,
+            infoMessage: null,
             resetErrors: mockResetErrors,
         });
     });
@@ -88,11 +89,31 @@ describe('MemeField Component', () => {
             isIndeterminate: false,
             isError: true,
             errorMessage: 'Test error occurred',
+            infoMessage: null,
             resetErrors: mockResetErrors,
         });
 
         render(<MemeField />);
         expect(screen.getByText('Test error occurred')).toBeInTheDocument();
+    });
+
+    test('renders info message when present', () => {
+        useMemeStealer.mockReturnValue({
+            stealMeme: mockStealMeme,
+            isStealing: false,
+            isDownloading: false,
+            downloadProgress: 0,
+            isIndeterminate: false,
+            isError: false,
+            errorMessage: null,
+            infoMessage: 'Downloaded successfully: test-filename.mp4',
+            resetErrors: mockResetErrors,
+        });
+
+        render(<MemeField />);
+        expect(
+            screen.getByText('Downloaded successfully: test-filename.mp4'),
+        ).toBeInTheDocument();
     });
 
     test('renders progress bar when in progress', () => {

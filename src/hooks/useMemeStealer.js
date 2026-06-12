@@ -9,6 +9,7 @@ const useMemeStealer = () => {
     const [isStealing, setIsStealing] = useState(false);
     const [isError, setIsError] = useState(false);
     const [errorMessage, setErrorMessage] = useState(null);
+    const [infoMessage, setInfoMessage] = useState(null);
     const {
         isDownloading,
         downloadProgress,
@@ -21,6 +22,7 @@ const useMemeStealer = () => {
     const resetErrors = () => {
         setIsError(false);
         setErrorMessage(null);
+        setInfoMessage(null);
     };
 
     const stealMeme = async (url) => {
@@ -56,6 +58,7 @@ const useMemeStealer = () => {
 
             try {
                 await downloadMedia(bestMedia.url, filename, bestMedia.sizeMB);
+                setInfoMessage(`Downloaded successfully: ${filename}`);
             } catch (err) {
                 setIsError(true);
                 setErrorMessage(`Download failed: ${err.message}`);
@@ -92,6 +95,7 @@ const useMemeStealer = () => {
         isIndeterminate,
         isError,
         errorMessage,
+        infoMessage,
         resetErrors,
     };
 };

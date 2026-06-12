@@ -37,6 +37,7 @@ describe('useMemeStealer Hook', () => {
         expect(result.current.isDownloading).toBe(false);
         expect(result.current.isError).toBe(false);
         expect(result.current.errorMessage).toBe(null);
+        expect(result.current.infoMessage).toBe(null);
     });
 
     test('handles unsupported URL validation error', async () => {
@@ -82,6 +83,9 @@ describe('useMemeStealer Hook', () => {
             3.4,
         );
         expect(result.current.isError).toBe(false);
+        expect(result.current.infoMessage).toBe(
+            'Downloaded successfully: mock-filename.mp4',
+        );
     });
 
     test('handles scraping failure response from service', async () => {
