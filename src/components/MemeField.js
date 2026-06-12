@@ -16,6 +16,7 @@ const MemeField = () => {
         isError,
         errorMessage,
         resetErrors,
+        manualSaveInfo,
     } = useMemeStealer();
 
     const [stealingButtonLabel, setStealingButtonLabel] = useState(
@@ -124,6 +125,32 @@ const MemeField = () => {
                 </div>
 
                 {errorMessage && <div className="error">{errorMessage}</div>}
+
+                {manualSaveInfo && (
+                    <div className="manual-save-box">
+                        <div className="manual-save-header">
+                            <span className="manual-save-icon">ℹ️</span>
+                            <span>
+                                Direct download is blocked by platform security.
+                            </span>
+                        </div>
+                        <div className="manual-save-instruction">
+                            Right-click the button below and choose{' '}
+                            <strong>"Save Link As..."</strong> (or long-press
+                            and choose <strong>"Download Link"</strong> on
+                            mobile) to download the video.
+                        </div>
+                        <a
+                            href={manualSaveInfo.url}
+                            download={manualSaveInfo.filename}
+                            className="manual-download-btn"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Download File
+                        </a>
+                    </div>
+                )}
             </form>
         </div>
     );

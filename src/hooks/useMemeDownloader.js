@@ -23,6 +23,7 @@ const useMemeDownloader = () => {
             const requestUrl = `${Constants.DOWNLOAD}?url=${encodeURIComponent(directMediaUrl)}&filename=${encodeURIComponent(filename)}`;
             let response = await fetch(requestUrl);
 
+            let isManualSave = false;
             if (response.status === 403) {
                 try {
                     const clone = response.clone();
@@ -35,23 +36,21 @@ const useMemeDownloader = () => {
                         try {
                             response = await fetch(directMediaUrl);
                             if (!response.ok) {
-                                throw new Error(`HTTP error! Status: ${response.status}`);
+                                throw new Error(
+                                    `HTTP error! Status: ${response.status}`,
+                                );
                             }
-                        } catch (directErr) {
-                            const a = document.createElement('a');
-                            a.href = directMediaUrl;
-                            a.target = '_blank';
-                            a.rel = 'noopener noreferrer';
-                            a.download = filename;
-                            document.body.appendChild(a);
-                            a.click();
-                            a.remove();
-                            return;
+                        } catch (_directErr) {
+                            isManualSave = true;
                         }
                     }
-                } catch (jsonErr) {
+                } catch (_jsonErr) {
                     // Ignore JSON parsing issues and proceed with original response status check
                 }
+            }
+
+            if (isManualSave) {
+                throw new Error('manual-save-required');
             }
 
             if (response.status === 504 || response.status === 502) {

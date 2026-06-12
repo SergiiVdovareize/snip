@@ -9,6 +9,7 @@ const useMemeStealer = () => {
     const [isStealing, setIsStealing] = useState(false);
     const [isError, setIsError] = useState(false);
     const [errorMessage, setErrorMessage] = useState(null);
+    const [manualSaveInfo, setManualSaveInfo] = useState(null);
 
     const {
         isDownloading,
@@ -22,6 +23,7 @@ const useMemeStealer = () => {
     const resetErrors = () => {
         setIsError(false);
         setErrorMessage(null);
+        setManualSaveInfo(null);
     };
 
     const stealMeme = async (url) => {
@@ -59,8 +61,15 @@ const useMemeStealer = () => {
             try {
                 await downloadMedia(bestMedia.url, filename, bestMedia.sizeMB);
             } catch (err) {
-                setIsError(true);
-                setErrorMessage(`Download failed: ${err.message}`);
+                if (err.message === 'manual-save-required') {
+                    setManualSaveInfo({
+                        url: bestMedia.url,
+                        filename: filename,
+                    });
+                } else {
+                    setIsError(true);
+                    setErrorMessage(`Download failed: ${err.message}`);
+                }
             }
         } else {
             setDownloadProgress(0);
@@ -95,6 +104,7 @@ const useMemeStealer = () => {
         isError,
         errorMessage,
         resetErrors,
+        manualSaveInfo,
     };
 };
 

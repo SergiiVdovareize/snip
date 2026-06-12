@@ -10,6 +10,9 @@
     --accent-shadow: rgba(3, 32, 80, 0.6);
     --btn-shadow: rgba(2, 8, 23, 0.6);
     --danger: #ff6b6b; /* errors */
+    --warning: #ffb020; /* warnings/attention */
+    --warning-bg: rgba(255, 176, 32, 0.08); /* amber background */
+    --warning-border: rgba(255, 176, 32, 0.25); /* amber border */
 }
 
 body {
@@ -221,5 +224,80 @@ code {
     }
     100% {
         background-position: 20px 0;
+    }
+}
+
+/* Manual download UI block */
+.manual-save-box {
+    margin-top: 1.5rem;
+    padding: 1.25rem;
+    border-radius: 8px;
+    background-color: var(--warning-bg);
+    border: 1px solid var(--warning-border);
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    animation: fadeIn 0.3s ease;
+}
+
+.manual-save-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--warning);
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.manual-save-icon {
+    font-size: 18px;
+}
+
+.manual-save-instruction {
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.5;
+}
+
+.manual-save-instruction strong {
+    color: var(--warning);
+}
+
+.manual-download-btn {
+    align-self: flex-start;
+    display: inline-block;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    color: white;
+    background-color: var(--accent);
+    padding: 0.6em 1.2em;
+    border-radius: 6px;
+    box-shadow: 0 4px 0 var(--accent-shadow);
+    transition:
+        transform 120ms ease,
+        box-shadow 160ms ease,
+        background-color 150ms ease;
+}
+
+.manual-download-btn:hover {
+    background-color: var(--accent-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 5px 0 var(--accent-shadow);
+}
+
+.manual-download-btn:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 var(--accent-shadow);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
 }
