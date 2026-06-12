@@ -1,5 +1,8 @@
 # Snip
 
+[![Deploy to GitHub Pages](https://github.com/SergiiVdovareize/snip/actions/workflows/deploy.yml/badge.svg)](https://github.com/SergiiVdovareize/snip/actions/workflows/deploy.yml)
+[![Tests](https://img.shields.io/badge/tests-29%20passed-brightgreen)](#testing)
+
 **Snip** is a lightweight web application that allows you to download videos from popular social media platforms quickly and easily.
 
 ## Features
@@ -41,6 +44,20 @@ Visit the live application: [https://snip.vdovareize.me](https://snip.vdovareize
 2. Paste the URL into the text field (or use the "Paste" button)
 3. Click "Steal me" to download the video
 4. The video will be saved to your downloads folder with a timestamp
+
+## Testing
+
+To run the unit and integration test suites:
+
+```bash
+npm test
+```
+
+To run tests with code coverage output:
+
+```bash
+npm run coverage
+```
 
 ## Supported URL Formats
 

@@ -1,5 +1,21 @@
-// jest-dom adds custom jest matchers for asserting on DOM nodes.
-// allows you to do things like:
-// expect(element).toHaveTextContent(/react/i)
-// learn more: https://github.com/testing-library/jest-dom
 import '@testing-library/jest-dom';
+
+// Mock Sentry globally to prevent tracking during tests
+jest.mock('@sentry/react', () => ({
+    init: jest.fn(),
+    captureMessage: jest.fn(),
+    captureException: jest.fn(),
+    browserTracingIntegration: jest.fn(),
+    replayIntegration: jest.fn(),
+}));
+
+// Mock PostHog globally (using virtual: true in case it gets added later)
+jest.mock(
+    'posthog-js',
+    () => ({
+        init: jest.fn(),
+        capture: jest.fn(),
+        identify: jest.fn(),
+    }),
+    { virtual: true },
+);
