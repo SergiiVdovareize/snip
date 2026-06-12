@@ -1,15 +1,23 @@
 :root {
     /* Dark, shadowy theme */
-    --bg: #2a313e; /* almost black with a hint of blue */
-    --panel: #3f4c5e; /* input/panel background */
-    --text: #e6eef8; /* light text for contrast */
-    --muted: #8b98a8; /* muted text */
-    --border: #273449; /* subtle border */
-    --accent: #0b5ed7; /* stealing action accent */
-    --accent-dark: #083e90; /* darker accent for hover */
+    --bg: #2a313e;
+    /* almost black with a hint of blue */
+    --panel: #3f4c5e;
+    /* input/panel background */
+    --text: #e6eef8;
+    /* light text for contrast */
+    --muted: #8b98a8;
+    /* muted text */
+    --border: #273449;
+    /* subtle border */
+    --accent: #0b5ed7;
+    /* stealing action accent */
+    --accent-dark: #083e90;
+    /* darker accent for hover */
     --accent-shadow: rgba(3, 32, 80, 0.6);
     --btn-shadow: rgba(2, 8, 23, 0.6);
-    --danger: #ff6b6b; /* errors */
+    --danger: #ff6b6b;
+    /* errors */
 }
 
 body {
@@ -124,13 +132,15 @@ code {
 
 .info {
     margin: 1em 0;
-    color: #4ade80;
+    color: #1cce6b;
+    font-size: 18px;
 }
 
 @media (max-width: 480px) {
     .container {
         padding: 0.75rem;
     }
+
     .stealing-button {
         font-size: 16px;
         padding: 0.5em;
@@ -178,6 +188,7 @@ code {
     0% {
         background-position: 0 0;
     }
+
     100% {
         background-position: 20px 0;
     }
@@ -224,6 +235,7 @@ code {
     0% {
         background-position: 0 0;
     }
+
     100% {
         background-position: 20px 0;
     }

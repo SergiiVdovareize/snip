@@ -84,7 +84,7 @@ describe('useMemeStealer Hook', () => {
         );
         expect(result.current.isError).toBe(false);
         expect(result.current.infoMessage).toBe(
-            'Downloaded successfully: mock-filename.mp4',
+            'File successfully downloaded: mock-filename.mp4',
         );
     });
 
@@ -151,7 +151,7 @@ describe('useMemeStealer Hook', () => {
         });
 
         expect(result.current.infoMessage).toBe(
-            'Downloaded successfully: mock-filename.mp4',
+            'File successfully downloaded: mock-filename.mp4',
         );
 
         // Fast-forward 10 seconds

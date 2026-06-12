@@ -67,7 +67,7 @@ const useMemeStealer = () => {
 
             try {
                 await downloadMedia(bestMedia.url, filename, bestMedia.sizeMB);
-                setInfoMessage(`Downloaded successfully: ${filename}`);
+                setInfoMessage(`File successfully downloaded: ${filename}`);
             } catch (err) {
                 setIsError(true);
                 setErrorMessage(`Download failed: ${err.message}`);

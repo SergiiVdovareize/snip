@@ -106,13 +106,13 @@ describe('MemeField Component', () => {
             isIndeterminate: false,
             isError: false,
             errorMessage: null,
-            infoMessage: 'Downloaded successfully: test-filename.mp4',
+            infoMessage: 'File successfully downloaded: test-filename.mp4',
             resetErrors: mockResetErrors,
         });
 
         render(<MemeField />);
         expect(
-            screen.getByText('Downloaded successfully: test-filename.mp4'),
+            screen.getByText('File successfully downloaded: test-filename.mp4'),
         ).toBeInTheDocument();
     });
 
