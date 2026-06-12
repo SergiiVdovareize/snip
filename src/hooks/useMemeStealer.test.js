@@ -129,4 +129,37 @@ describe('useMemeStealer Hook', () => {
             'Download failed: Download timeout',
         );
     });
+
+    test('clears the info message automatically after 10 seconds', async () => {
+        jest.useFakeTimers();
+        validateMeme.mockReturnValue('https://twitter.com/post/123');
+        StealingService.stealMeme.mockResolvedValue({
+            success: true,
+            platform: 'twitter',
+            media: [
+                {
+                    url: 'https://twitter-cdn.com/media.mp4',
+                    sizeMB: 3.4,
+                },
+            ],
+        });
+
+        const { result } = renderHook(() => useMemeStealer());
+
+        await act(async () => {
+            await result.current.stealMeme('https://twitter.com/post/123');
+        });
+
+        expect(result.current.infoMessage).toBe(
+            'Downloaded successfully: mock-filename.mp4',
+        );
+
+        // Fast-forward 10 seconds
+        act(() => {
+            jest.advanceTimersByTime(10000);
+        });
+
+        expect(result.current.infoMessage).toBe(null);
+        jest.useRealTimers();
+    });
 });

@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { prepareFilename } from '../utils/filename';
 import StealingService from '../utils/StealService';
 import { validateMeme } from '../utils/validation';
@@ -18,6 +18,15 @@ const useMemeStealer = () => {
         setDownloadProgress,
         downloadMedia,
     } = useMemeDownloader();
+
+    useEffect(() => {
+        if (infoMessage) {
+            const timer = setTimeout(() => {
+                setInfoMessage(null);
+            }, 10000);
+            return () => clearTimeout(timer);
+        }
+    }, [infoMessage]);
 
     const resetErrors = () => {
         setIsError(false);
