@@ -10,9 +10,6 @@
     --accent-shadow: rgba(3, 32, 80, 0.6);
     --btn-shadow: rgba(2, 8, 23, 0.6);
     --danger: #ff6b6b; /* errors */
-    --info: #0b5ed7; /* info blue */
-    --info-bg: rgba(11, 94, 215, 0.08); /* blue background */
-    --info-border: rgba(11, 94, 215, 0.25); /* blue border */
 }
 
 body {
@@ -224,70 +221,5 @@ code {
     }
     100% {
         background-position: 20px 0;
-    }
-}
-
-/* Manual download UI block */
-.manual-save-box {
-    margin-top: 1.5rem;
-    padding: 1.25rem;
-    border-radius: 8px;
-    background-color: var(--info-bg);
-    border: 1px solid var(--info-border);
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    animation: fadeIn 0.3s ease;
-}
-
-.manual-save-header {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: var(--info);
-    font-weight: 600;
-    font-size: 16px;
-}
-
-.manual-save-icon {
-    font-size: 18px;
-}
-
-.manual-save-instruction {
-    font-size: 14px;
-    color: var(--text);
-    line-height: 1.5;
-}
-
-.manual-save-instruction strong {
-    color: var(--info);
-}
-
-.manual-download-btn {
-    align-self: flex-start;
-    display: inline-block;
-    font-size: 15px;
-    font-weight: 600;
-    text-decoration: underline;
-    color: var(--info);
-    transition: color 150ms ease;
-}
-
-.manual-download-btn:hover {
-    color: var(--accent-dark);
-}
-
-.manual-download-btn:active {
-    opacity: 0.8;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(5px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
     }
 }
