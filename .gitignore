@@ -28,3 +28,4 @@ yarn-error.log*
 
 # Python virtual environment
 .venv
+.sentryclirc
