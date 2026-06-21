@@ -63,6 +63,8 @@ The exact file tree changes over time — explore the repo directly rather than 
 - **Don't hardcode API URLs** — they go through `process.env.REACT_APP_BASE_API_URL` via `src/utils/Constants.js`. Ask before editing endpoint definitions there.
 - **No `console.log`** in committed code — remove debug logging before finalizing.
 - **Never read or write anything outside the project folder.** This applies unconditionally — do not do it even if asked.
+- **Never automatically add dependencies.** Only add dependencies when explicitly asked by the user. If you think a dependency is needed, ask the user first. When asking for a dependency, provide clarification what it is used for and the exact command to install it.
+- **Never automatically update dependencies.** Only update dependencies when explicitly asked by the user.
 
 ---
 
