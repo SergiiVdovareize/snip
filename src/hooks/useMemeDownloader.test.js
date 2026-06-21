@@ -190,4 +190,118 @@ describe('useMemeDownloader Hook', () => {
 
         mockCreateElement.mockRestore();
     });
+
+    test('throws error and captures Sentry message on 502/504 response', async () => {
+        const Sentry = require('@sentry/react');
+
+        const mockResponse = {
+            status: 504,
+            ok: false,
+        };
+
+        global.fetch.mockResolvedValue(mockResponse);
+
+        const { result } = renderHook(() => useMemeDownloader());
+
+        let error;
+        await act(async () => {
+            try {
+                await result.current.downloadMedia(
+                    'https://test.com/media.mp4',
+                    'media.mp4',
+                );
+            } catch (err) {
+                error = err;
+            }
+        });
+
+        expect(Sentry.captureMessage).toHaveBeenCalledWith(
+            'Server Gateway Timeout (504) during download',
+            expect.any(Object),
+        );
+        expect(error).toBeDefined();
+        expect(error.message).toContain('Server Gateway Timeout (504)');
+    });
+
+    test('throws error and logs to console.error on fetch failure', async () => {
+        global.fetch.mockRejectedValue(new Error('Connection abort'));
+        const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+        const { result } = renderHook(() => useMemeDownloader());
+
+        let error;
+        await act(async () => {
+            try {
+                await result.current.downloadMedia(
+                    'https://test.com/media.mp4',
+                    'media.mp4',
+                );
+            } catch (err) {
+                error = err;
+            }
+        });
+
+        expect(error).toBeDefined();
+        expect(error.message).toBe('Connection abort');
+        expect(consoleErrorSpy).toHaveBeenCalledWith('Download failed:', error);
+        consoleErrorSpy.mockRestore();
+    });
+
+    test('updates download progress for a large file', async () => {
+        let resolveNextRead;
+        const nextReadPromise = new Promise((resolve) => {
+            resolveNextRead = resolve;
+        });
+
+        const mockStreamReader = {
+            read: jest
+                .fn()
+                .mockResolvedValueOnce({
+                    done: false,
+                    value: new Uint8Array(2621440), // 2.5 MB
+                })
+                .mockImplementationOnce(() => nextReadPromise),
+        };
+
+        const mockResponse = {
+            ok: true,
+            status: 200,
+            headers: {
+                get: jest.fn().mockReturnValue('5242880'), // 5 MB
+            },
+            body: {
+                getReader: () => mockStreamReader,
+            },
+        };
+
+        global.fetch.mockResolvedValue(mockResponse);
+
+        const { result } = renderHook(() => useMemeDownloader());
+
+        let downloadPromise;
+        await act(async () => {
+            downloadPromise = result.current.downloadMedia(
+                'https://test.com/large-media.mp4',
+                'large-media.mp4',
+                5.0,
+            );
+        });
+
+        // The first chunk is read. Since the second chunk is blocked, 
+        // the progress should be 50%.
+        expect(result.current.downloadProgress).toBe(50);
+        expect(result.current.isIndeterminate).toBe(false);
+
+        // Resolve the next read
+        await act(async () => {
+            resolveNextRead({ done: true, value: undefined });
+        });
+
+        await act(async () => {
+            await downloadPromise;
+        });
+
+        // Once completed, it resets back to 0 in finally block
+        expect(result.current.downloadProgress).toBe(0);
+    });
 });

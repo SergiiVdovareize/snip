@@ -174,4 +174,90 @@ describe('MemeField Component', () => {
         expect(textarea.value).toBe('');
         expect(mockResetErrors).toHaveBeenCalled();
     });
+
+    test('pastes value using execCommand if supported', () => {
+        const originalExecCommand = document.execCommand;
+        document.execCommand = jest.fn().mockReturnValue(true);
+
+        render(<MemeField />);
+        fireEvent.click(screen.getByRole('button', { name: /paste/i }));
+
+        expect(document.execCommand).toHaveBeenCalledWith('paste');
+        expect(mockResetErrors).toHaveBeenCalled();
+
+        if (originalExecCommand === undefined) {
+            delete document.execCommand;
+        } else {
+            document.execCommand = originalExecCommand;
+        }
+    });
+
+    test('pastes value using navigator.clipboard when execCommand is not supported', async () => {
+        const originalClipboard = navigator.clipboard;
+        const mockReadText = jest.fn().mockResolvedValue('https://youtube.com/watch?v=999');
+        Object.defineProperty(navigator, 'clipboard', {
+            value: { readText: mockReadText },
+            configurable: true,
+            writable: true,
+        });
+
+        const originalExecCommand = document.execCommand;
+        document.execCommand = jest.fn().mockReturnValue(false);
+
+        render(<MemeField />);
+        const textarea = screen.getByPlaceholderText(/paste url here/i);
+        fireEvent.click(screen.getByRole('button', { name: /paste/i }));
+
+        // Wait for async state updates
+        await screen.findByDisplayValue('https://youtube.com/watch?v=999');
+
+        expect(textarea.value).toBe('https://youtube.com/watch?v=999');
+        expect(mockResetErrors).toHaveBeenCalled();
+        expect(document.execCommand).toHaveBeenCalledWith('paste');
+
+        if (originalExecCommand === undefined) {
+            delete document.execCommand;
+        } else {
+            document.execCommand = originalExecCommand;
+        }
+        Object.defineProperty(navigator, 'clipboard', {
+            value: originalClipboard,
+            configurable: true,
+            writable: true,
+        });
+    });
+
+    test('logs error on console.error when navigator.clipboard.readText fails', async () => {
+        const originalClipboard = navigator.clipboard;
+        const mockReadText = jest.fn().mockRejectedValue(new Error('Permission denied'));
+        Object.defineProperty(navigator, 'clipboard', {
+            value: { readText: mockReadText },
+            configurable: true,
+            writable: true,
+        });
+
+        const originalExecCommand = document.execCommand;
+        document.execCommand = jest.fn().mockReturnValue(false);
+        const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+        render(<MemeField />);
+        fireEvent.click(screen.getByRole('button', { name: /paste/i }));
+
+        // Wait for the async error catch to execute
+        await new Promise((resolve) => setTimeout(resolve, 0));
+
+        expect(consoleErrorSpy).toHaveBeenCalledWith('Paste failed:', expect.any(Error));
+
+        if (originalExecCommand === undefined) {
+            delete document.execCommand;
+        } else {
+            document.execCommand = originalExecCommand;
+        }
+        consoleErrorSpy.mockRestore();
+        Object.defineProperty(navigator, 'clipboard', {
+            value: originalClipboard,
+            configurable: true,
+            writable: true,
+        });
+    });
 });
