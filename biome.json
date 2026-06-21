@@ -7,7 +7,11 @@
     },
     "files": {
         "ignoreUnknown": false,
-        "includes": ["**", "!build", "!node_modules"]
+        "includes": [
+            "**",
+            "!build",
+            "!node_modules"
+        ]
     },
     "formatter": {
         "enabled": true,
@@ -17,20 +21,53 @@
     "linter": {
         "enabled": true,
         "rules": {
-            "recommended": true
-        }
-    },
-    "javascript": {
-        "formatter": {
-            "quoteStyle": "single"
-        }
-    },
-    "assist": {
-        "enabled": true,
-        "actions": {
-            "source": {
-                "organizeImports": "on"
+            "recommended": true,
+            "style": {
+                "useNamingConvention": {
+                    "level": "warn",
+                    "options": {
+                        "strictCase": false,
+                        "conventions": [
+                            {
+                                "selector": {
+                                    "kind": "function"
+                                },
+                                "formats": [
+                                    "camelCase"
+                                ]
+                            },
+                            {
+                                "selector": {
+                                    "kind": "variable"
+                                },
+                                "formats": [
+                                    "camelCase"
+                                ]
+                            },
+                            {
+                                "selector": {
+                                    "kind": "typeLike"
+                                },
+                                "formats": [
+                                    "PascalCase"
+                                ]
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        "javascript": {
+            "formatter": {
+                "quoteStyle": "single"
+            }
+        },
+        "assist": {
+            "enabled": true,
+            "actions": {
+                "source": {
+                    "organizeImports": "on"
+                }
             }
         }
     }
-}
