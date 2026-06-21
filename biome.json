@@ -7,11 +7,7 @@
     },
     "files": {
         "ignoreUnknown": false,
-        "includes": [
-            "**",
-            "!build",
-            "!node_modules"
-        ]
+        "includes": ["**", "!build", "!node_modules"]
     },
     "formatter": {
         "enabled": true,
@@ -32,42 +28,37 @@
                                 "selector": {
                                     "kind": "function"
                                 },
-                                "formats": [
-                                    "camelCase"
-                                ]
+                                "formats": ["camelCase"]
                             },
                             {
                                 "selector": {
                                     "kind": "variable"
                                 },
-                                "formats": [
-                                    "camelCase"
-                                ]
+                                "formats": ["camelCase"]
                             },
                             {
                                 "selector": {
                                     "kind": "typeLike"
                                 },
-                                "formats": [
-                                    "PascalCase"
-                                ]
+                                "formats": ["PascalCase"]
                             }
                         ]
                     }
                 }
             }
-        },
-        "javascript": {
-            "formatter": {
-                "quoteStyle": "single"
-            }
-        },
-        "assist": {
-            "enabled": true,
-            "actions": {
-                "source": {
-                    "organizeImports": "on"
-                }
+        }
+    },
+    "javascript": {
+        "formatter": {
+            "quoteStyle": "single"
+        }
+    },
+    "assist": {
+        "enabled": true,
+        "actions": {
+            "source": {
+                "organizeImports": "on"
             }
         }
     }
+}

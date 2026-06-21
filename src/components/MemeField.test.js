@@ -194,7 +194,9 @@ describe('MemeField Component', () => {
 
     test('pastes value using navigator.clipboard when execCommand is not supported', async () => {
         const originalClipboard = navigator.clipboard;
-        const mockReadText = jest.fn().mockResolvedValue('https://youtube.com/watch?v=999');
+        const mockReadText = jest
+            .fn()
+            .mockResolvedValue('https://youtube.com/watch?v=999');
         Object.defineProperty(navigator, 'clipboard', {
             value: { readText: mockReadText },
             configurable: true,
@@ -229,7 +231,9 @@ describe('MemeField Component', () => {
 
     test('logs error on console.error when navigator.clipboard.readText fails', async () => {
         const originalClipboard = navigator.clipboard;
-        const mockReadText = jest.fn().mockRejectedValue(new Error('Permission denied'));
+        const mockReadText = jest
+            .fn()
+            .mockRejectedValue(new Error('Permission denied'));
         Object.defineProperty(navigator, 'clipboard', {
             value: { readText: mockReadText },
             configurable: true,
@@ -238,7 +242,9 @@ describe('MemeField Component', () => {
 
         const originalExecCommand = document.execCommand;
         document.execCommand = jest.fn().mockReturnValue(false);
-        const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+        const consoleErrorSpy = jest
+            .spyOn(console, 'error')
+            .mockImplementation(() => {});
 
         render(<MemeField />);
         fireEvent.click(screen.getByRole('button', { name: /paste/i }));
@@ -246,7 +252,10 @@ describe('MemeField Component', () => {
         // Wait for the async error catch to execute
         await new Promise((resolve) => setTimeout(resolve, 0));
 
-        expect(consoleErrorSpy).toHaveBeenCalledWith('Paste failed:', expect.any(Error));
+        expect(consoleErrorSpy).toHaveBeenCalledWith(
+            'Paste failed:',
+            expect.any(Error),
+        );
 
         if (originalExecCommand === undefined) {
             delete document.execCommand;

@@ -192,7 +192,7 @@ describe('useMemeDownloader Hook', () => {
     });
 
     test('throws error and captures Sentry message on 502/504 response', async () => {
-        const Sentry = require('@sentry/react');
+        const sentry = require('@sentry/react');
 
         const mockResponse = {
             status: 504,
@@ -215,7 +215,7 @@ describe('useMemeDownloader Hook', () => {
             }
         });
 
-        expect(Sentry.captureMessage).toHaveBeenCalledWith(
+        expect(sentry.captureMessage).toHaveBeenCalledWith(
             'Server Gateway Timeout (504) during download',
             expect.any(Object),
         );
@@ -225,7 +225,9 @@ describe('useMemeDownloader Hook', () => {
 
     test('throws error and logs to console.error on fetch failure', async () => {
         global.fetch.mockRejectedValue(new Error('Connection abort'));
-        const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+        const consoleErrorSpy = jest
+            .spyOn(console, 'error')
+            .mockImplementation(() => {});
 
         const { result } = renderHook(() => useMemeDownloader());
 
@@ -287,7 +289,7 @@ describe('useMemeDownloader Hook', () => {
             );
         });
 
-        // The first chunk is read. Since the second chunk is blocked, 
+        // The first chunk is read. Since the second chunk is blocked,
         // the progress should be 50%.
         expect(result.current.downloadProgress).toBe(50);
         expect(result.current.isIndeterminate).toBe(false);

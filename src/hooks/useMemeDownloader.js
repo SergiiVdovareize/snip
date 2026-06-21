@@ -10,11 +10,11 @@ const useMemeDownloader = () => {
     const downloadMedia = async (directMediaUrl, filename, sizeMB) => {
         setIsDownloading(true);
 
-        const SMALL_FILE_THRESHOLD_MB = 2;
+        const smallFileThresholdMb = 2;
         const isKnownSmall =
             sizeMB !== undefined &&
             sizeMB !== null &&
-            sizeMB < SMALL_FILE_THRESHOLD_MB;
+            sizeMB < smallFileThresholdMb;
         if (isKnownSmall) {
             setIsIndeterminate(true);
         }
@@ -84,7 +84,7 @@ const useMemeDownloader = () => {
             const isSizeSmall =
                 isKnownSmall ||
                 (totalBytes > 0 &&
-                    totalBytes < SMALL_FILE_THRESHOLD_MB * 1024 * 1024) ||
+                    totalBytes < smallFileThresholdMb * 1024 * 1024) ||
                 (sizeMB === undefined && totalBytes === 0);
 
             if (isSizeSmall) {

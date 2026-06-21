@@ -1,5 +1,5 @@
-import StealingService from './StealService';
 import Constants from './Constants';
+import StealingService from './StealService';
 
 describe('StealingService', () => {
     let originalFetch;
@@ -14,7 +14,10 @@ describe('StealingService', () => {
     });
 
     test('stealMeme returns json on success', async () => {
-        const mockResult = { success: true, media: [{ url: 'http://example.com/file.mp4' }] };
+        const mockResult = {
+            success: true,
+            media: [{ url: 'http://example.com/file.mp4' }],
+        };
         global.fetch.mockResolvedValueOnce({
             ok: true,
             status: 200,
