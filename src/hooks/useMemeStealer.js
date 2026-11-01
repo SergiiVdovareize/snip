@@ -1,12 +1,10 @@
 import * as Sentry from '@sentry/react';
 import { useEffect, useState } from 'react';
-import { prepareFilename } from '../utils/filename';
 import StealingService from '../utils/StealService';
 import { validateMeme } from '../utils/validation';
 import useMemeDownloader from './useMemeDownloader';
 
 const useMemeStealer = () => {
-    const [isStealing, setIsStealing] = useState(false);
     const [isError, setIsError] = useState(false);
     const [errorMessage, setErrorMessage] = useState(null);
     const [infoMessage, setInfoMessage] = useState(null);
@@ -14,6 +12,7 @@ const useMemeStealer = () => {
         isDownloading,
         downloadProgress,
         isIndeterminate,
+        setIsDownloading,
         setIsIndeterminate,
         setDownloadProgress,
         downloadMedia,
@@ -43,62 +42,130 @@ const useMemeStealer = () => {
             return false;
         }
 
-        setIsStealing(true);
+        setIsDownloading(true);
         setIsIndeterminate(true);
         setDownloadProgress(0);
 
-        let result;
         try {
-            result = await StealingService.stealMeme(sanitizedSource);
-        } catch (err) {
-            result = { success: false, error: err.message };
-        } finally {
-            setIsStealing(false);
-        }
+            const response = await StealingService.stealMeme(sanitizedSource);
 
-        if (
-            result.success === true &&
-            result.media &&
-            result.media.length > 0
-        ) {
-            const bestMedia = result.media[0];
+            if (!response.ok) {
+                setIsDownloading(false);
+                setIsIndeterminate(false);
+                setDownloadProgress(0);
 
-            const filename = prepareFilename(result.platform, bestMedia);
+                if (response.status === 400) {
+                    let msg = 'Only video content is supported';
+                    try {
+                        const errJson = await response.json();
+                        if (errJson?.message) {
+                            msg = Array.isArray(errJson.message)
+                                ? errJson.message.join(', ')
+                                : errJson.message;
+                        }
+                    } catch {
+                        // ignore JSON parse failure
+                    }
+                    setIsError(true);
+                    setErrorMessage(msg);
+                    return false;
+                }
 
-            try {
-                await downloadMedia(bestMedia.url, filename, bestMedia.sizeMB);
-                setInfoMessage(`File successfully downloaded: ${filename}`);
-            } catch (err) {
-                setIsError(true);
-                setErrorMessage(`Download failed: ${err.message}`);
-            }
-        } else {
-            setDownloadProgress(0);
-            setIsIndeterminate(false);
-            const errorMsg = result.error || 'Unknown error occurred';
-            setErrorMessage(errorMsg);
+                if (response.status === 404) {
+                    let msg = 'Video not found or unavailable';
+                    try {
+                        const errJson = await response.json();
+                        if (errJson?.message) {
+                            msg = Array.isArray(errJson.message)
+                                ? errJson.message.join(', ')
+                                : errJson.message;
+                        }
+                    } catch {
+                        // ignore JSON parse failure
+                    }
+                    setIsError(true);
+                    setErrorMessage(msg);
+                    return false;
+                }
 
-            if (result.status === 504 || result.status === 502) {
-                Sentry.captureMessage(
-                    `Server Gateway Timeout (${result.status}) during scraping`,
-                    {
-                        level: 'error',
-                        extra: {
-                            url: sanitizedSource,
-                            status: result.status,
-                            error: errorMsg,
+                if (response.status === 504 || response.status === 502) {
+                    const errorMsg = `Server Gateway Timeout (${response.status})`;
+                    setIsError(true);
+                    setErrorMessage(errorMsg);
+                    Sentry.captureMessage(
+                        `Server Gateway Timeout (${response.status}) during scraping`,
+                        {
+                            level: 'error',
+                            extra: {
+                                url: sanitizedSource,
+                                status: response.status,
+                                error: errorMsg,
+                            },
                         },
-                    },
-                );
-            }
-        }
+                    );
+                    return false;
+                }
 
-        return false;
+                if (response.status === 500) {
+                    let msg = 'Failed to extract video';
+                    try {
+                        const errJson = await response.json();
+                        if (errJson?.message) {
+                            msg = Array.isArray(errJson.message)
+                                ? errJson.message.join(', ')
+                                : errJson.message;
+                        }
+                    } catch {
+                        // ignore JSON parse failure
+                    }
+                    setIsError(true);
+                    setErrorMessage(msg);
+                    Sentry.captureMessage(
+                        'Server error (500) during extraction',
+                        {
+                            level: 'error',
+                            extra: {
+                                url: sanitizedSource,
+                                status: response.status,
+                                error: msg,
+                            },
+                        },
+                    );
+                    return false;
+                }
+
+                let errorMsg = `HTTP error! Status: ${response.status}`;
+                try {
+                    const errJson = await response.json();
+                    if (errJson?.message) {
+                        errorMsg = Array.isArray(errJson.message)
+                            ? errJson.message.join(', ')
+                            : errJson.message;
+                    }
+                } catch {
+                    // ignore JSON parse failure
+                }
+                setIsError(true);
+                setErrorMessage(errorMsg);
+                return false;
+            }
+
+            const filename = await downloadMedia(response);
+            setInfoMessage(`File successfully downloaded: ${filename}`);
+            return true;
+        } catch (err) {
+            setIsDownloading(false);
+            setIsIndeterminate(false);
+            setDownloadProgress(0);
+            setIsError(true);
+            setErrorMessage(`Download failed: ${err.message}`);
+            return false;
+        }
     };
 
     return {
         stealMeme,
-        isStealing,
+        isStealing: false,
         isDownloading,
         downloadProgress,
         isIndeterminate,

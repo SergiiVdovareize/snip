@@ -1,97 +1,69 @@
 import * as Sentry from '@sentry/react';
 import { useState } from 'react';
-import Constants from '../utils/Constants';
+import { getFilenameFromContentDisposition } from '../utils/filename';
 
 const useMemeDownloader = () => {
     const [isDownloading, setIsDownloading] = useState(false);
     const [downloadProgress, setDownloadProgress] = useState(0);
     const [isIndeterminate, setIsIndeterminate] = useState(false);
 
-    const downloadMedia = async (directMediaUrl, filename, sizeMB) => {
+    const downloadMedia = async (
+        responseOrUrl,
+        fallbackFilename = 'video.mp4',
+    ) => {
         setIsDownloading(true);
 
-        const smallFileThresholdMb = 2;
-        const isKnownSmall =
-            sizeMB !== undefined &&
-            sizeMB !== null &&
-            sizeMB < smallFileThresholdMb;
-        if (isKnownSmall) {
-            setIsIndeterminate(true);
-        }
-
         try {
-            const requestUrl = `${Constants.DOWNLOAD}?url=${encodeURIComponent(directMediaUrl)}&filename=${encodeURIComponent(filename)}`;
-            let response = await fetch(requestUrl);
-
-            if (response.status === 403) {
-                try {
-                    const clone = response.clone();
-                    const errJson = await clone.json();
-                    if (
-                        errJson &&
-                        errJson.statusCode === 403 &&
-                        errJson.message === 'Failed to fetch media: Forbidden'
-                    ) {
-                        try {
-                            response = await fetch(directMediaUrl);
-                            if (!response.ok) {
-                                throw new Error(
-                                    `HTTP error! Status: ${response.status}`,
-                                );
-                            }
-                        } catch {
-                            const a = document.createElement('a');
-                            a.href = directMediaUrl;
-                            a.target = '_blank';
-                            a.rel = 'noopener noreferrer';
-                            a.download = filename;
-                            document.body.appendChild(a);
-                            a.click();
-                            a.remove();
-                            return;
-                        }
+            let response = responseOrUrl;
+            if (typeof responseOrUrl === 'string') {
+                response = await fetch(responseOrUrl);
+                if (!response.ok) {
+                    if (response.status === 504 || response.status === 502) {
+                        Sentry.captureMessage(
+                            `Server Gateway Timeout (${response.status}) during download`,
+                            {
+                                level: 'error',
+                                extra: {
+                                    url: responseOrUrl,
+                                    status: response.status,
+                                },
+                            },
+                        );
+                        throw new Error(
+                            `Server Gateway Timeout (${response.status})`,
+                        );
                     }
-                } catch {
-                    // Ignore JSON parsing issues and proceed with original response status check
+                    throw new Error(`HTTP error! Status: ${response.status}`);
                 }
             }
 
-            if (response.status === 504 || response.status === 502) {
-                Sentry.captureMessage(
-                    `Server Gateway Timeout (${response.status}) during download`,
-                    {
-                        level: 'error',
-                        extra: {
-                            url: directMediaUrl,
-                            status: response.status,
-                        },
-                    },
-                );
-                throw new Error(`Server Gateway Timeout (${response.status})`);
-            }
+            const disposition = response.headers?.get
+                ? response.headers.get('content-disposition')
+                : null;
+            const filename = getFilenameFromContentDisposition(
+                disposition,
+                fallbackFilename,
+            );
 
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-
-            const contentLength = response.headers.get('content-length');
+            const contentLength = response.headers?.get
+                ? response.headers.get('content-length')
+                : null;
             const totalBytes = contentLength ? parseInt(contentLength, 10) : 0;
 
-            const reader = response.body.getReader();
-            const chunks = [];
-            let receivedLength = 0;
-
+            const smallFileThresholdMb = 2;
             const isSizeSmall =
-                isKnownSmall ||
-                (totalBytes > 0 &&
-                    totalBytes < smallFileThresholdMb * 1024 * 1024) ||
-                (sizeMB === undefined && totalBytes === 0);
+                totalBytes === 0 ||
+                totalBytes < smallFileThresholdMb * 1024 * 1024;
 
             if (isSizeSmall) {
                 setIsIndeterminate(true);
             } else {
                 setIsIndeterminate(false);
             }
+
+            const reader = response.body.getReader();
+            const chunks = [];
+            let receivedLength = 0;
 
             while (true) {
                 const { done, value } = await reader.read();
@@ -113,7 +85,7 @@ const useMemeDownloader = () => {
             setDownloadProgress(100);
             await new Promise((resolve) => setTimeout(resolve, 250)); // Briefly show 100% completion
 
-            const blob = new Blob(chunks);
+            const blob = new Blob(chunks, { type: 'video/mp4' });
             const downloadUrl = URL.createObjectURL(blob);
 
             const a = document.createElement('a');
@@ -124,6 +96,7 @@ const useMemeDownloader = () => {
             a.remove();
 
             URL.revokeObjectURL(downloadUrl);
+            return filename;
         } catch (error) {
             console.error('Download failed:', error);
             throw error;
@@ -138,6 +111,7 @@ const useMemeDownloader = () => {
         isDownloading,
         downloadProgress,
         isIndeterminate,
+        setIsDownloading,
         setIsIndeterminate,
         setDownloadProgress,
         downloadMedia,

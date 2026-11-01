@@ -1,3 +1,45 @@
+export const getFilenameFromContentDisposition = (
+    contentDisposition,
+    fallback = 'video.mp4',
+) => {
+    if (!contentDisposition || typeof contentDisposition !== 'string') {
+        return fallback;
+    }
+
+    // Check RFC 5987 / RFC 6266 format: filename*=UTF-8''...
+    const utf8Match = contentDisposition.match(
+        /filename\*=(?:UTF-8'')?([^;]+)/i,
+    );
+    if (utf8Match?.[1]) {
+        try {
+            const raw = utf8Match[1].trim().replace(/^["']|["']$/g, '');
+            const decoded = decodeURIComponent(raw);
+            if (decoded) {
+                return decoded;
+            }
+        } catch {
+            // fall through to standard filename matching
+        }
+    }
+
+    // Standard filename="..." or filename=...
+    const standardMatch = contentDisposition.match(
+        /filename=(?:"([^"]*)"|([^;\s]+))/i,
+    );
+    if (standardMatch) {
+        const raw =
+            standardMatch[1] !== undefined
+                ? standardMatch[1]
+                : standardMatch[2];
+        const name = (raw || '').replace(/^["']|["']$/g, '').trim();
+        if (name) {
+            return name;
+        }
+    }
+
+    return fallback;
+};
+
 export const prepareFilename = (platform, mediaItem) => {
     const service = (platform || 'unknown').toLowerCase();
     const mediaType = (mediaItem.type || 'video').toLowerCase();

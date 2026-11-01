@@ -1,74 +1,8 @@
 import Constants from './Constants';
 
-const getResult = async (url) => {
-    try {
-        const data = await fetch(url);
-        if (!data.ok) {
-            return {
-                success: false,
-                status: data.status,
-                error: `HTTP error! Status: ${data.status}`,
-            };
-        }
-        const json = await data.json();
-        return json;
-
-        // if (json.type === 'sync') {
-        //     return json.data;
-        // }
-
-        // if (json.type === 'async') {
-        //     return await getAsyncResult(`${Constants.RESULT_URL}/${json.data}`)
-        // }
-
-        // return {
-        //     success: false,
-        //     error: json.error || json.message || 'unknown issue',
-        // }
-    } catch (error) {
-        return {
-            success: false,
-            error: error.message,
-        };
-    }
-};
-
-// eslint-disable-next-line no-unused-vars
-const _getAsyncResult = async (url) => {
-    try {
-        const data = await fetch(url);
-        if (!data.ok) {
-            return {
-                success: false,
-                status: data.status,
-                error: `HTTP error! Status: ${data.status}`,
-            };
-        }
-        const json = await data.json();
-
-        if (json.success) {
-            return json;
-        }
-
-        if (!json.success && json.status === 2) {
-            return await _getAsyncResult(url);
-        }
-
-        return {
-            success: false,
-            error: json.error || json.message || 'unknown issue',
-        };
-    } catch (error) {
-        return {
-            success: false,
-            error: error.message,
-        };
-    }
-};
-
 const StealingService = {
     async stealMeme(memeUrl) {
-        return await getResult(
+        return await fetch(
             `${Constants.MEME_STEALER_URL}/${encodeURIComponent(memeUrl)}`,
         );
     },

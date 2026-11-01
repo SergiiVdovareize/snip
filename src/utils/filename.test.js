@@ -1,4 +1,43 @@
-import { prepareFilename } from './filename';
+import { getFilenameFromContentDisposition, prepareFilename } from './filename';
+
+describe('getFilenameFromContentDisposition', () => {
+    test('returns fallback when header is missing or null', () => {
+        expect(getFilenameFromContentDisposition(null)).toBe('video.mp4');
+        expect(getFilenameFromContentDisposition(undefined)).toBe('video.mp4');
+        expect(getFilenameFromContentDisposition(undefined, 'custom.mp4')).toBe(
+            'custom.mp4',
+        );
+    });
+
+    test('extracts filename from standard double-quoted format', () => {
+        const header = 'attachment; filename="my_video.mp4"';
+        expect(getFilenameFromContentDisposition(header)).toBe('my_video.mp4');
+    });
+
+    test('extracts filename from unquoted format', () => {
+        const header = 'attachment; filename=my_video.mp4';
+        expect(getFilenameFromContentDisposition(header)).toBe('my_video.mp4');
+    });
+
+    test('extracts filename from RFC 5987 / RFC 6266 UTF-8 encoded format', () => {
+        const header =
+            "attachment; filename*=UTF-8''%D0%BA%D1%96%D1%82%20%D0%BC%D0%B5%D0%BC.mp4";
+        expect(getFilenameFromContentDisposition(header)).toBe('кіт мем.mp4');
+    });
+
+    test('prefers UTF-8 encoded filename* over standard filename', () => {
+        const header =
+            'attachment; filename="fallback.mp4"; filename*=UTF-8\'\'preferred.mp4';
+        expect(getFilenameFromContentDisposition(header)).toBe('preferred.mp4');
+    });
+
+    test('falls back when filename attribute is empty', () => {
+        const header = 'attachment; filename=""';
+        expect(getFilenameFromContentDisposition(header, 'default.mp4')).toBe(
+            'default.mp4',
+        );
+    });
+});
 
 describe('prepareFilename', () => {
     test('should format filename with platform, mediaType, resolution, alphanumId and extension', () => {

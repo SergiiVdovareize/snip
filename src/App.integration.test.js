@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/react';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import App from './App';
 
@@ -7,6 +8,7 @@ jest.mock('@sentry/react', () => ({
 
 describe('Snip Application Integration Tests', () => {
     let originalFetch;
+    let clickSpy;
 
     beforeAll(() => {
         originalFetch = global.fetch;
@@ -18,26 +20,17 @@ describe('Snip Application Integration Tests', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
-        // Spy on document.createElement to verify download trigger
-        jest.spyOn(document, 'createElement');
+        // Mock HTMLAnchorElement.prototype.click to prevent JSDOM navigation error
+        clickSpy = jest
+            .spyOn(HTMLAnchorElement.prototype, 'click')
+            .mockImplementation(() => {});
     });
 
     afterEach(() => {
-        document.createElement.mockRestore();
+        clickSpy.mockRestore();
     });
 
-    test('successful end-to-end stealing and downloading flow', async () => {
-        const mockMetadata = {
-            success: true,
-            platform: 'twitter',
-            media: [
-                {
-                    url: 'https://twitter-cdn.com/media.mp4',
-                    sizeMB: 3.4,
-                },
-            ],
-        };
-
+    test('successful end-to-end direct stream downloading flow', async () => {
         const mockReader = {
             read: jest
                 .fn()
@@ -48,43 +41,34 @@ describe('Snip Application Integration Tests', () => {
                 .mockResolvedValueOnce({ done: true }),
         };
 
-        const mockDownloadResponse = {
+        const mockStreamResponse = {
             ok: true,
             status: 200,
             headers: {
-                get: (header) => (header === 'content-length' ? '3' : null),
+                get: (header) => {
+                    if (header === 'content-length') return '3';
+                    if (header === 'content-disposition')
+                        return 'attachment; filename="twitter_video.mp4"';
+                    return null;
+                },
             },
             body: {
                 getReader: () => mockReader,
             },
         };
 
-        let resolveSteal;
-        const stealPromise = new Promise((resolve) => {
-            resolveSteal = () =>
-                resolve({
-                    ok: true,
-                    status: 200,
-                    json: () => Promise.resolve(mockMetadata),
-                });
-        });
-
-        let resolveDownload;
-        const downloadPromise = new Promise((resolve) => {
-            resolveDownload = () => resolve(mockDownloadResponse);
+        let resolveStream;
+        const streamPromise = new Promise((resolve) => {
+            resolveStream = () => resolve(mockStreamResponse);
         });
 
         global.fetch = jest.fn((url) => {
             if (url.includes('/memes')) {
-                return stealPromise;
-            }
-            if (url.includes('/download')) {
-                return downloadPromise;
+                return streamPromise;
             }
             return Promise.reject(new Error(`Unexpected fetch URL: ${url}`));
         });
 
-        // Mock URL.createObjectURL and URL.revokeObjectURL
         const originalCreateObjectURL = URL.createObjectURL;
         const originalRevokeObjectURL = URL.revokeObjectURL;
         URL.createObjectURL = jest.fn(() => 'blob:mock-download-url');
@@ -95,33 +79,24 @@ describe('Snip Application Integration Tests', () => {
         const textarea = screen.getByPlaceholderText(/paste url here/i);
         const submitButton = screen.getByRole('button', { name: /steal me/i });
 
-        // Input a valid Twitter URL
         fireEvent.change(textarea, {
             target: { value: 'https://twitter.com/username/status/123456789' },
         });
 
-        // Trigger stealing submit (does not resolve stealPromise yet)
+        // Trigger stealing submit
         await act(async () => {
             fireEvent.click(submitButton);
         });
 
-        // Verify elements are disabled during stealing/downloading
+        // Verify elements are disabled during download
         expect(textarea).toBeDisabled();
 
-        // Resolve steal metadata fetch
+        // Resolve single-step stream fetch
         await act(async () => {
-            resolveSteal();
+            resolveStream();
         });
 
-        // Verify elements are still disabled (now in downloading state)
-        expect(textarea).toBeDisabled();
-
-        // Resolve download media fetch
-        await act(async () => {
-            resolveDownload();
-        });
-
-        // Wait for state updates to finish (including the short 250ms delay for completion visual feedback)
+        // Wait for short delay for 100% completion feedback
         await act(async () => {
             await new Promise((resolve) => setTimeout(resolve, 300));
         });
@@ -129,22 +104,19 @@ describe('Snip Application Integration Tests', () => {
         // Verify elements are re-enabled
         expect(textarea).not.toBeDisabled();
 
-        // Verify fetch was called correctly
-        expect(global.fetch).toHaveBeenCalledTimes(2);
-        expect(global.fetch).toHaveBeenNthCalledWith(
-            1,
+        // Verify single fetch call to /memes/:url
+        expect(global.fetch).toHaveBeenCalledTimes(1);
+        expect(global.fetch).toHaveBeenCalledWith(
             expect.stringContaining(
                 '/memes/https%3A%2F%2Ftwitter.com%2Fusername%2Fstatus%2F123456789',
             ),
         );
-        expect(global.fetch).toHaveBeenNthCalledWith(
-            2,
-            expect.stringContaining(
-                '/download?url=https%3A%2F%2Ftwitter-cdn.com%2Fmedia.mp4',
-            ),
-        );
 
-        // Restore URL mocks
+        // Verify info message displayed with parsed filename
+        expect(
+            screen.getByText('File successfully downloaded: twitter_video.mp4'),
+        ).toBeInTheDocument();
+
         URL.createObjectURL = originalCreateObjectURL;
         URL.revokeObjectURL = originalRevokeObjectURL;
     });
@@ -157,7 +129,6 @@ describe('Snip Application Integration Tests', () => {
         const textarea = screen.getByPlaceholderText(/paste url here/i);
         const submitButton = screen.getByRole('button', { name: /steal me/i });
 
-        // Input an unsupported URL
         fireEvent.change(textarea, {
             target: { value: 'https://unsupported-site.com/video/123' },
         });
@@ -171,89 +142,17 @@ describe('Snip Application Integration Tests', () => {
         expect(screen.getByText('URL is not supported')).toBeInTheDocument();
     });
 
-    test('handles 403 Forbidden with direct link fallback in the download proxy', async () => {
-        const mockMetadata = {
-            success: true,
-            platform: 'instagram',
-            media: [
-                {
-                    url: 'https://instagram-cdn.com/reel.mp4',
-                    sizeMB: 1.5,
-                },
-            ],
-        };
-
+    test('handles 400 Bad Request error response (photo-only post)', async () => {
         const mockErrorResponse = {
             ok: false,
-            status: 403,
-            clone: () => ({
-                json: () =>
-                    Promise.resolve({
-                        statusCode: 403,
-                        message: 'Failed to fetch media: Forbidden',
-                    }),
-            }),
+            status: 400,
+            json: () =>
+                Promise.resolve({
+                    message: 'Only video content is supported',
+                }),
         };
 
-        const mockDirectReader = {
-            read: jest
-                .fn()
-                .mockResolvedValueOnce({
-                    done: false,
-                    value: new Uint8Array([9, 9]),
-                })
-                .mockResolvedValueOnce({ done: true }),
-        };
-
-        const mockDirectResponse = {
-            ok: true,
-            status: 200,
-            headers: {
-                get: (header) => (header === 'content-length' ? '2' : null),
-            },
-            body: {
-                getReader: () => mockDirectReader,
-            },
-        };
-
-        let resolveSteal;
-        const stealPromise = new Promise((resolve) => {
-            resolveSteal = () =>
-                resolve({
-                    ok: true,
-                    status: 200,
-                    json: () => Promise.resolve(mockMetadata),
-                });
-        });
-
-        let resolveDownloadError;
-        const downloadErrorPromise = new Promise((resolve) => {
-            resolveDownloadError = () => resolve(mockErrorResponse);
-        });
-
-        let resolveDirectDownload;
-        const directDownloadPromise = new Promise((resolve) => {
-            resolveDirectDownload = () => resolve(mockDirectResponse);
-        });
-
-        global.fetch = jest.fn((url) => {
-            if (url.includes('/memes')) {
-                return stealPromise;
-            }
-            if (url.includes('/download')) {
-                return downloadErrorPromise;
-            }
-            if (url.includes('https://instagram-cdn.com/')) {
-                return directDownloadPromise;
-            }
-            return Promise.reject(new Error(`Unexpected fetch URL: ${url}`));
-        });
-
-        // Mock URL.createObjectURL and URL.revokeObjectURL
-        const originalCreateObjectURL = URL.createObjectURL;
-        const originalRevokeObjectURL = URL.revokeObjectURL;
-        URL.createObjectURL = jest.fn(() => 'blob:mock-direct-download-url');
-        URL.revokeObjectURL = jest.fn();
+        global.fetch = jest.fn().mockResolvedValue(mockErrorResponse);
 
         render(<App />);
 
@@ -261,48 +160,50 @@ describe('Snip Application Integration Tests', () => {
         const submitButton = screen.getByRole('button', { name: /steal me/i });
 
         fireEvent.change(textarea, {
-            target: { value: 'https://instagram.com/reel/123/' },
+            target: { value: 'https://instagram.com/p/photo123' },
         });
 
         await act(async () => {
             fireEvent.click(submitButton);
         });
 
-        // Resolve steal metadata
-        await act(async () => {
-            resolveSteal();
+        expect(
+            screen.getByText('Only video content is supported'),
+        ).toBeInTheDocument();
+    });
+
+    test('handles 504 Gateway Timeout error response and captures to Sentry', async () => {
+        const mockErrorResponse = {
+            ok: false,
+            status: 504,
+        };
+
+        global.fetch = jest.fn().mockResolvedValue(mockErrorResponse);
+
+        render(<App />);
+
+        const textarea = screen.getByPlaceholderText(/paste url here/i);
+        const submitButton = screen.getByRole('button', { name: /steal me/i });
+
+        fireEvent.change(textarea, {
+            target: { value: 'https://twitter.com/user/status/504' },
         });
 
-        // Resolve download proxy failure (403)
         await act(async () => {
-            resolveDownloadError();
+            fireEvent.click(submitButton);
         });
 
-        // Resolve direct link fetch
-        await act(async () => {
-            resolveDirectDownload();
-        });
-
-        await act(async () => {
-            await new Promise((resolve) => setTimeout(resolve, 300));
-        });
-
-        // Verify it attempted to fetch proxy first, got 403, then fetched direct URL
-        expect(global.fetch).toHaveBeenCalledTimes(3);
-        expect(global.fetch).toHaveBeenNthCalledWith(
-            1,
-            expect.stringContaining('/memes/'),
+        expect(
+            screen.getByText('Server Gateway Timeout (504)'),
+        ).toBeInTheDocument();
+        expect(Sentry.captureMessage).toHaveBeenCalledWith(
+            'Server Gateway Timeout (504) during scraping',
+            expect.objectContaining({
+                level: 'error',
+                extra: expect.objectContaining({
+                    status: 504,
+                }),
+            }),
         );
-        expect(global.fetch).toHaveBeenNthCalledWith(
-            2,
-            expect.stringContaining('/download'),
-        );
-        expect(global.fetch).toHaveBeenNthCalledWith(
-            3,
-            'https://instagram-cdn.com/reel.mp4',
-        );
-
-        URL.createObjectURL = originalCreateObjectURL;
-        URL.revokeObjectURL = originalRevokeObjectURL;
     });
 });

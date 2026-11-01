@@ -1,5 +1,5 @@
+import * as Sentry from '@sentry/react';
 import { act, renderHook } from '@testing-library/react';
-import Constants from '../utils/Constants';
 import useMemeDownloader from './useMemeDownloader';
 
 jest.mock('@sentry/react', () => ({
@@ -11,6 +11,7 @@ describe('useMemeDownloader Hook', () => {
     let originalCreateObjectURL;
     let originalRevokeObjectURL;
     let clickSpy;
+    let consoleErrorSpy;
 
     beforeEach(() => {
         originalFetch = global.fetch;
@@ -21,9 +22,11 @@ describe('useMemeDownloader Hook', () => {
         global.URL.createObjectURL = jest.fn(() => 'blob:mock-url');
         global.URL.revokeObjectURL = jest.fn();
 
-        // Mock HTMLAnchorElement.prototype.click to prevent JSDOM navigation error
         clickSpy = jest
             .spyOn(HTMLAnchorElement.prototype, 'click')
+            .mockImplementation(() => {});
+        consoleErrorSpy = jest
+            .spyOn(console, 'error')
             .mockImplementation(() => {});
 
         jest.clearAllMocks();
@@ -34,6 +37,7 @@ describe('useMemeDownloader Hook', () => {
         global.URL.createObjectURL = originalCreateObjectURL;
         global.URL.revokeObjectURL = originalRevokeObjectURL;
         clickSpy.mockRestore();
+        consoleErrorSpy.mockRestore();
     });
 
     test('initializes with default states', () => {
@@ -43,7 +47,7 @@ describe('useMemeDownloader Hook', () => {
         expect(result.current.isIndeterminate).toBe(false);
     });
 
-    test('downloads a small file successfully', async () => {
+    test('downloads from response with content-length successfully', async () => {
         const mockStreamReader = {
             read: jest
                 .fn()
@@ -58,252 +62,162 @@ describe('useMemeDownloader Hook', () => {
             ok: true,
             status: 200,
             headers: {
-                get: jest.fn().mockReturnValue('3'),
+                get: (h) => {
+                    if (h === 'content-length') return '3';
+                    if (h === 'content-disposition')
+                        return 'attachment; filename="streamed_cat.mp4"';
+                    return null;
+                },
             },
             body: {
                 getReader: () => mockStreamReader,
             },
         };
 
-        global.fetch.mockResolvedValue(mockResponse);
-
         const { result } = renderHook(() => useMemeDownloader());
 
-        let downloadPromise;
+        let filename;
         await act(async () => {
-            downloadPromise = result.current.downloadMedia(
-                'https://test.com/media.mp4',
-                'media.mp4',
-                0.5,
-            );
+            filename = await result.current.downloadMedia(mockResponse);
         });
 
-        await act(async () => {
-            await downloadPromise;
-        });
-
-        expect(global.fetch).toHaveBeenCalledWith(
-            `${Constants.DOWNLOAD}?url=${encodeURIComponent('https://test.com/media.mp4')}&filename=${encodeURIComponent('media.mp4')}`,
-        );
+        expect(filename).toBe('streamed_cat.mp4');
         expect(result.current.isDownloading).toBe(false);
-    });
-
-    test('performs direct fetch fallback on 403 proxy response', async () => {
-        const mockErrorJson = {
-            statusCode: 403,
-            message: 'Failed to fetch media: Forbidden',
-        };
-
-        const mockProxyResponse = {
-            status: 403,
-            clone: () => ({
-                json: () => Promise.resolve(mockErrorJson),
-            }),
-        };
-
-        const mockStreamReader = {
-            read: jest.fn().mockResolvedValue({ done: true, value: undefined }),
-        };
-
-        const mockDirectResponse = {
-            ok: true,
-            status: 200,
-            headers: {
-                get: jest.fn().mockReturnValue(null),
-            },
-            body: {
-                getReader: () => mockStreamReader,
-            },
-        };
-
-        global.fetch
-            .mockResolvedValueOnce(mockProxyResponse)
-            .mockResolvedValueOnce(mockDirectResponse);
-
-        const { result } = renderHook(() => useMemeDownloader());
-
-        let downloadPromise;
-        await act(async () => {
-            downloadPromise = result.current.downloadMedia(
-                'https://test.com/media.mp4',
-                'media.mp4',
-            );
-        });
-
-        await act(async () => {
-            await downloadPromise;
-        });
-
-        expect(global.fetch).toHaveBeenCalledTimes(2);
-        expect(global.fetch).toHaveBeenNthCalledWith(
-            2,
-            'https://test.com/media.mp4',
-        );
-    });
-
-    test('clicks fallback link in target blank on 403 direct fetch failure', async () => {
-        const mockErrorJson = {
-            statusCode: 403,
-            message: 'Failed to fetch media: Forbidden',
-        };
-
-        const mockProxyResponse = {
-            status: 403,
-            clone: () => ({
-                json: () => Promise.resolve(mockErrorJson),
-            }),
-        };
-
-        global.fetch
-            .mockResolvedValueOnce(mockProxyResponse)
-            .mockRejectedValueOnce(new Error('CORS fail'));
-
-        const mockAnchor = document.createElement('a');
-        const originalCreateElement = document.createElement.bind(document);
-        const mockCreateElement = jest
-            .spyOn(document, 'createElement')
-            .mockImplementation((tagName) => {
-                if (tagName === 'a') {
-                    return mockAnchor;
-                }
-                return originalCreateElement(tagName);
-            });
-
-        const { result } = renderHook(() => useMemeDownloader());
-
-        let downloadPromise;
-        await act(async () => {
-            downloadPromise = result.current.downloadMedia(
-                'https://test.com/media.mp4',
-                'media.mp4',
-            );
-        });
-
-        await act(async () => {
-            await downloadPromise;
-        });
-
-        expect(mockCreateElement).toHaveBeenCalledWith('a');
-        expect(mockAnchor.href).toBe('https://test.com/media.mp4');
-        expect(mockAnchor.target).toBe('_blank');
+        expect(global.URL.createObjectURL).toHaveBeenCalled();
         expect(clickSpy).toHaveBeenCalled();
-
-        mockCreateElement.mockRestore();
-    });
-
-    test('throws error and captures Sentry message on 502/504 response', async () => {
-        const sentry = require('@sentry/react');
-
-        const mockResponse = {
-            status: 504,
-            ok: false,
-        };
-
-        global.fetch.mockResolvedValue(mockResponse);
-
-        const { result } = renderHook(() => useMemeDownloader());
-
-        let error;
-        await act(async () => {
-            try {
-                await result.current.downloadMedia(
-                    'https://test.com/media.mp4',
-                    'media.mp4',
-                );
-            } catch (err) {
-                error = err;
-            }
-        });
-
-        expect(sentry.captureMessage).toHaveBeenCalledWith(
-            'Server Gateway Timeout (504) during download',
-            expect.any(Object),
+        expect(global.URL.revokeObjectURL).toHaveBeenCalledWith(
+            'blob:mock-url',
         );
-        expect(error).toBeDefined();
-        expect(error.message).toContain('Server Gateway Timeout (504)');
     });
 
-    test('throws error and logs to console.error on fetch failure', async () => {
-        global.fetch.mockRejectedValue(new Error('Connection abort'));
-        const consoleErrorSpy = jest
-            .spyOn(console, 'error')
-            .mockImplementation(() => {});
-
-        const { result } = renderHook(() => useMemeDownloader());
-
-        let error;
-        await act(async () => {
-            try {
-                await result.current.downloadMedia(
-                    'https://test.com/media.mp4',
-                    'media.mp4',
-                );
-            } catch (err) {
-                error = err;
-            }
-        });
-
-        expect(error).toBeDefined();
-        expect(error.message).toBe('Connection abort');
-        expect(consoleErrorSpy).toHaveBeenCalledWith('Download failed:', error);
-        consoleErrorSpy.mockRestore();
-    });
-
-    test('updates download progress for a large file', async () => {
-        let resolveNextRead;
-        const nextReadPromise = new Promise((resolve) => {
-            resolveNextRead = resolve;
-        });
-
+    test('downloads response with indeterminate progress when content-length is missing', async () => {
         const mockStreamReader = {
             read: jest
                 .fn()
                 .mockResolvedValueOnce({
                     done: false,
-                    value: new Uint8Array(2621440), // 2.5 MB
+                    value: new Uint8Array([5, 6]),
                 })
-                .mockImplementationOnce(() => nextReadPromise),
+                .mockResolvedValueOnce({ done: true, value: undefined }),
         };
 
         const mockResponse = {
             ok: true,
             status: 200,
             headers: {
-                get: jest.fn().mockReturnValue('5242880'), // 5 MB
+                get: (h) => (h === 'content-length' ? null : null),
             },
             body: {
                 getReader: () => mockStreamReader,
             },
         };
 
-        global.fetch.mockResolvedValue(mockResponse);
-
         const { result } = renderHook(() => useMemeDownloader());
 
-        let downloadPromise;
+        let filename;
         await act(async () => {
-            downloadPromise = result.current.downloadMedia(
-                'https://test.com/large-media.mp4',
-                'large-media.mp4',
-                5.0,
+            filename = await result.current.downloadMedia(
+                mockResponse,
+                'fallback.mp4',
             );
         });
 
-        // The first chunk is read. Since the second chunk is blocked,
-        // the progress should be 50%.
-        expect(result.current.downloadProgress).toBe(50);
-        expect(result.current.isIndeterminate).toBe(false);
+        expect(filename).toBe('fallback.mp4');
+        expect(result.current.isDownloading).toBe(false);
+    });
 
-        // Resolve the next read
+    test('fetches direct URL when passed string and streams download', async () => {
+        const mockStreamReader = {
+            read: jest
+                .fn()
+                .mockResolvedValueOnce({
+                    done: false,
+                    value: new Uint8Array([1, 2]),
+                })
+                .mockResolvedValueOnce({ done: true }),
+        };
+
+        const mockResponse = {
+            ok: true,
+            status: 200,
+            headers: {
+                get: (h) => (h === 'content-length' ? '2' : null),
+            },
+            body: {
+                getReader: () => mockStreamReader,
+            },
+        };
+
+        global.fetch.mockResolvedValueOnce(mockResponse);
+
+        const { result } = renderHook(() => useMemeDownloader());
+
+        let filename;
         await act(async () => {
-            resolveNextRead({ done: true, value: undefined });
+            filename = await result.current.downloadMedia(
+                'https://example.com/direct.mp4',
+                'custom.mp4',
+            );
         });
 
+        expect(filename).toBe('custom.mp4');
+        expect(global.fetch).toHaveBeenCalledWith(
+            'https://example.com/direct.mp4',
+        );
+        expect(result.current.isDownloading).toBe(false);
+    });
+
+    test('handles 504 Gateway Timeout when fetching string URL and reports to Sentry', async () => {
+        const mockErrorResponse = {
+            ok: false,
+            status: 504,
+        };
+        global.fetch.mockResolvedValueOnce(mockErrorResponse);
+
+        const { result } = renderHook(() => useMemeDownloader());
+
         await act(async () => {
-            await downloadPromise;
+            await expect(
+                result.current.downloadMedia('https://example.com/timeout.mp4'),
+            ).rejects.toThrow('Server Gateway Timeout (504)');
         });
 
-        // Once completed, it resets back to 0 in finally block
+        expect(Sentry.captureMessage).toHaveBeenCalledWith(
+            'Server Gateway Timeout (504) during download',
+            expect.objectContaining({
+                level: 'error',
+                extra: expect.objectContaining({ status: 504 }),
+            }),
+        );
+        expect(result.current.isDownloading).toBe(false);
+    });
+
+    test('handles stream reading errors and resets downloading states', async () => {
+        const mockStreamReader = {
+            read: jest.fn().mockRejectedValue(new Error('Network interrupted')),
+        };
+
+        const mockResponse = {
+            ok: true,
+            status: 200,
+            headers: {
+                get: () => null,
+            },
+            body: {
+                getReader: () => mockStreamReader,
+            },
+        };
+
+        const { result } = renderHook(() => useMemeDownloader());
+
+        await act(async () => {
+            await expect(
+                result.current.downloadMedia(mockResponse),
+            ).rejects.toThrow('Network interrupted');
+        });
+
+        expect(result.current.isDownloading).toBe(false);
         expect(result.current.downloadProgress).toBe(0);
+        expect(result.current.isIndeterminate).toBe(false);
     });
 });
